@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Farmácia Alegria - Login | Sistema Farmacêutico</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a472a 0%, #0d2818 100%);
+            font-family: 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Fundo com ícones e elementos de farmácia */
+        body::before {
+            content: "💊";
+            position: absolute;
+            font-size: 300px;
+            opacity: 0.06;
+            bottom: -80px;
+            left: -80px;
+            pointer-events: none;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        body::after {
+            content: "⚕️";
+            position: absolute;
+            font-size: 280px;
+            opacity: 0.06;
+            top: -100px;
+            right: -80px;
+            pointer-events: none;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Elementos decorativos de farmácia */
+        .pharma-bg-icon-1 {
+            position: absolute;
+            top: 20%;
+            left: 5%;
+            font-size: 60px;
+            opacity: 0.08;
+            animation: spin 20s linear infinite;
+        }
+
+        .pharma-bg-icon-2 {
+            position: absolute;
+            bottom: 15%;
+            right: 8%;
+            font-size: 80px;
+            opacity: 0.08;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .pharma-bg-icon-3 {
+            position: absolute;
+            top: 50%;
+            left: 15%;
+            font-size: 45px;
+            opacity: 0.06;
+            animation: bounce 6s ease-in-out infinite;
+        }
+
+        .pharma-bg-icon-4 {
+            position: absolute;
+            bottom: 30%;
+            right: 20%;
+            font-size: 55px;
+            opacity: 0.07;
+            animation: float 7s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        /* Card de Login - Estilo Farmácia Premium */
+        .login-card {
+            background: transparent);
+            backdrop-filter: blur(0px);
+            border-radius: 40px;
+            padding: 2.2rem 2rem;
+            box-shadow: 0 30px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            max-width: 450px;
+            width: 100%;
+            animation: fadeInScale 0.6s ease-out;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Logo e ícone da farmácia */
+        .logo-area {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.2rem;
+            box-shadow: 0 15px 25px rgba(46, 125, 50, 0.35);
+            animation: logoGlow 2.5s ease-in-out infinite;
+        }
+
+        @keyframes logoGlow {
+            0%, 100% { 
+                box-shadow: 0 15px 25px rgba(46, 125, 50, 0.35);
+            }
+            50% { 
+                box-shadow: 0 20px 35px rgba(46, 125, 50, 0.55);
+            }
+        }
+
+        .logo-icon i {
+            font-size: 52px;
+            color: white;
+        }
+
+        .logo-area h1 {
+            color: #1b5e20;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-area p {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .badge-pharma {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: 50px;
+            padding: 5px 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            color: #2e7d32;
+            margin-top: 0.8rem;
+        }
+
+        /* Inputs com ícones */
+        .input-group-custom {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group-custom i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #fff;
+            font-size: 1.1rem;
+            z-index: 10;
+        }
+
+        .form-control-pharma {
+            background: transparent;
+            border: 1.5px solid #e0e0e0;
+            color: #333;
+            border-radius: 18px;
+            padding: 14px 20px 14px 48px;
+            font-size: 0.95rem;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-pharma:focus {
+            background: #C4C4C41A;
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.12);
+            color: #333;
+            outline: none;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            border: none;
+            border-radius: 18px;
+            padding: 14px;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 0.8rem;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(46, 125, 50, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login i {
+            margin-right: 8px;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 1.8rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: #757575;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-link:hover {
+            color: #2e7d32;
+        }
+
+        .divider {
+            color: #ddd;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        input::placeholder {
+            color: #5F5F5F;
+        }
+
+        /* Responsividade */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 1.8rem 1.5rem;
+            }
+            .logo-icon {
+                width: 80px;
+                height: 80px;
+            }
+            .logo-icon i {
+                font-size: 42px;
+            }
+            .logo-area h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Cruz médica decorativa */
+        .medical-cross {
+            position: absolute;
+            top: 10%;
+            right: 5%;
+            width: 80px;
+            height: 80px;
+            opacity: 0.08;
+            animation: rotate 12s linear infinite;
+        }
+
+        .medical-cross::before,
+        .medical-cross::after {
+            content: '';
+            position: absolute;
+            background: #fff;
+        }
+
+        .medical-cross::before {
+            width: 100%;
+            height: 20%;
+            top: 40%;
+            left: 0;
+        }
+
+        .medical-cross::after {
+            width: 20%;
+            height: 100%;
+            left: 40%;
+            top: 0;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Elementos decorativos de fundo -->
+    <div class="pharma-bg-icon-1">
+        <i class="fas fa-capsules"></i>
+    </div>
+    <div class="pharma-bg-icon-2">
+        <i class="fas fa-syringe"></i>
+    </div>
+    <div class="pharma-bg-icon-3">
+        <i class="fas fa-heartbeat"></i>
+    </div>
+    <div class="pharma-bg-icon-4">
+        <i class="fas fa-band-aid"></i>
+    </div>
+    <div class="medical-cross"></div>
+
+    <div class="login-card">
+        <div class="logo-area">
+            <div class="logo-icon">
+                <i class="fas fa-hospital-user"></i>
+            </div>
+            <h1 style="color: white">Farmácia Alegria</h1>
+            <p>Sistema de Gestão Farmacêutica</p>
+            <div class="badge-pharma">
+                <i class="fas fa-shield-alt"></i> Ambiente Seguro
+                <i class="fas fa-check-circle" style="margin-left: 5px;"></i>
+            </div>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group-custom">
+                <i class="fas fa-user-circle"></i>
+                <input type="text" class="form-control-pharma" id="username" placeholder="Nome de usuário" autocomplete="off" style="color: white" required>
+            </div>
+            <div class="input-group-custom">
+                <i class="fas fa-key"></i>
+                <input type="password" class="form-control-pharma" id="password" placeholder="Senha" style="color: white" required>
+            </div>
+            <button type="submit" class="btn-login" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Entrar no Sistema
+            </button>
+        </form>
+
+        <div class="footer-links">
+            <span class="footer-link" onclick="showForgotPassword()">
+                <i class="fas fa-envelope"></i> Esqueci minha senha
+            </span>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvDc46HzQviKzniF05xH6dMuOtKtsbQYQ",
+            authDomain: "sandfarma-b2170.firebaseapp.com",
+            databaseURL: "https://sandfarma-b2170-default-rtdb.firebaseio.com",
+            projectId: "sandfarma-b2170",
+            storageBucket: "sandfarma-b2170.firebasestorage.app",
+            messagingSenderId: "27746642641",
+            appId: "1:27746642641:web:a0fc437da19b07178e33f0"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Função para recuperar senha por e-mail
+        window.showForgotPassword = async () => {
+            const { value: email } = await Swal.fire({
+                title: '🔐 Recuperar Senha',
+                html: `
+                    <div style="text-align: left;">
+                        <p style="color: #666; margin-bottom: 1rem;">Digite seu e-mail cadastrado para recuperar a senha.</p>
+                        <div style="display: flex;;">
+                            <input type="email" id="swal-email" class="swal2-input" placeholder="seu@email.com" style="padding-left: 40px; width: 100%;">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Enviar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2e7d32',
+                cancelButtonColor: '#757575',
+                preConfirm: () => {
+                    const email = document.getElementById('swal-email').value;
+                    if (!email) {
+                        Swal.showValidationMessage('Digite seu e-mail!');
+                        return false;
+                    }
+                    if (!email.includes('@') || !email.includes('.')) {
+                        Swal.showValidationMessage('Digite um e-mail válido!');
+                        return false;
+                    }
+                    return email;
+                }
+            });
+
+            if (email) {
+                // Buscar usuário pelo e-mail (campo email nos usuários)
+                const snapshot = await database.ref('usuarios').orderByChild('email').equalTo(email).once('value');
+                const user = snapshot.val();
+                
+                if (user) {
+                    const userId = Object.keys(user)[0];
+                    const userData = user[userId];
+                    
+                    // Gerar nova senha temporária
+                    const tempPassword = Math.random().toString(36).substring(2, 10);
+                    
+                    // Atualizar senha no banco
+                    await database.ref('usuarios/' + userId).update({
+                        senha: tempPassword,
+                        senhaTemporaria: true,
+                        dataResetSenha: new Date().toISOString()
+                    });
+                    
+                    // Registrar log
+                    await database.ref('logs/' + Date.now()).set({
+                        acao: 'Recuperação de Senha',
+                        usuario: userData.nome,
+                        detalhes: `Solicitação de recuperação de senha via e-mail: ${email}`,
+                        data: new Date().toISOString()
+                    });
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'E-mail Enviado!',
+                        html: `
+                            <div style="text-align: left;">
+                                <p>Uma nova senha temporária foi gerada.</p>
+                                <p><strong>Usuário:</strong> ${userData.usuario}</p>
+                                <p><strong>Nova senha:</strong> <code style="background: #f0f0f0; padding: 4px 8px; border-radius: 6px;">${tempPassword}</code></p>
+                                <hr>
+                                <p class="text-muted" style="font-size: 0.85rem;">Por segurança, altere sua senha após o primeiro login.</p>
+                            </div>
+                        `,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#2e7d32'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'E-mail não encontrado',
+                        text: 'Nenhum usuário cadastrado com este e-mail. Verifique ou contate o administrador.',
+                        confirmButtonColor: '#2e7d32'
+                    });
+                }
+            }
+        };
+
+        // Login - Apenas nome de usuário e senha
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (!username || !password) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos vazios',
+                    text: 'Preencha o nome de usuário e a senha!',
+                    confirmButtonColor: '#2e7d32'
+                });
+                return;
+            }
+            
+            // Loading
+            loginBtn.innerHTML = '<span class="loading-spinner"></span> Autenticando...';
+            loginBtn.disabled = true;
+
+            try {
+                const snapshot = await database.ref('usuarios').once('value');
+                const users = snapshot.val();
+                let authenticated = false;
+                let userData = null;
+
+                if (users) {
+                    for (let key in users) {
+                        const user = users[key];
+                        if (user.usuario === username && user.senha === password) {
+                            authenticated = true;
+                            userData = user;
+                            break;
+                        }
+                    }
+                }
+
+                if (authenticated) {
+                    // Verificar se é senha temporária
+                    let message = `Olá ${userData.nome}, acesso permitido!`;
+                    if (userData.senhaTemporaria) {
+                        message = `Olá ${userData.nome}! Esta é uma senha temporária. Por favor, altere sua senha em: Configurações > Alterar Senha.`;
+                        // Remover flag de senha temporária
+                        await database.ref('usuarios/' + userData.uid).update({ senhaTemporaria: false });
+                    }
+                    
+                    // Salvar sessão
+                    localStorage.setItem('sandgest_user', JSON.stringify({
+                        uid: userData.uid,
+                        nome: userData.nome,
+                        tipo: userData.tipo
+                    }));
+                    
+                    // Registrar log de login
+                    await database.ref('logs/' + Date.now()).set({
+                        acao: 'Login',
+                        usuario: userData.nome,
+                        detalhes: 'Login realizado com sucesso',
+                        data: new Date().toISOString()
+                    });
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Bem-vindo!',
+                        text: message,
+                        timer: 2000,
+                        showConfirmButton: true,
+                        confirmButtonColor: '#2e7d32',
+                        didClose: () => {
+                            window.location.href = 'func.html';
+                        }
+                    });
+                } else {
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar no Sistema';
+                    loginBtn.disabled = false;
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Acesso Negado',
+                        text: 'Nome de usuário ou senha incorretos!',
+                        confirmButtonColor: '#2e7d32'
+                    });
+                }
+            } catch (error) {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar no Sistema';
+                loginBtn.disabled = false;
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro de Conexão',
+                    text: 'Não foi possível conectar ao servidor. Verifique sua internet.',
+                    confirmButtonColor: '#2e7d32'
+                });
+                console.error("Erro no login:", error);
+            }
+        });
+
+        // Enter key submit
+        document.getElementById('username').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        });
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        });
+    </script>
+</body>
+</html>
