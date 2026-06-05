@@ -3,16 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Farmácia Alegria - Login | Sistema Farmacêutico</title>
+    <title>Farmácia Alegria - Acessar Sistema</title>
+    
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -60,7 +65,7 @@
             50% { transform: translateY(-20px); }
         }
 
-        /* Elementos decorativos de farmácia */
+        /* Elementos decorativos */
         .pharma-bg-icon-1 {
             position: absolute;
             top: 20%;
@@ -112,14 +117,14 @@
             50% { transform: translateY(-15px); }
         }
 
-        /* Card de Login - Estilo Farmácia Premium */
-        .login-card {
-            background: transparent);
+        /* Card de Seleção */
+        .selection-card {
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(0px);
             border-radius: 40px;
-            padding: 2.2rem 2rem;
+            padding: 2.5rem 2rem;
             box-shadow: 0 30px 50px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2);
-            max-width: 450px;
+            max-width: 500px;
             width: 100%;
             animation: fadeInScale 0.6s ease-out;
             position: relative;
@@ -137,7 +142,7 @@
             }
         }
 
-        /* Logo e ícone da farmácia */
+        /* Logo e ícone */
         .logo-area {
             text-align: center;
             margin-bottom: 2rem;
@@ -197,42 +202,95 @@
             margin-top: 0.8rem;
         }
 
-        /* Inputs com ícones */
-        .input-group-custom {
-            position: relative;
-            margin-bottom: 1.5rem;
+        /* Opções de perfil */
+        .perfil-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
         }
 
-        .input-group-custom i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #fff;
-            font-size: 1.1rem;
-            z-index: 10;
+        .perfil-option {
+            background: #f8fafc;
+            border: 2px solid #e8ecef;
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
         }
 
-        .form-control-pharma {
-            background: transparent;
-            border: 1.5px solid #e0e0e0;
-            color: #333;
-            border-radius: 18px;
-            padding: 14px 20px 14px 48px;
-            font-size: 0.95rem;
-            width: 100%;
+        .perfil-option:hover {
+            transform: translateX(8px);
+            border-color: #2e7d32;
+            background: linear-gradient(135deg, #ffffff, #f1f8e9);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.15);
+        }
+
+        .perfil-option.selected {
+            border-color: #2e7d32;
+            background: linear-gradient(135deg, #e8f5e9, #ffffff);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+        }
+
+        .option-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
         }
 
-        .form-control-pharma:focus {
-            background: #C4C4C41A;
-            border-color: #2e7d32;
-            box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.12);
-            color: #333;
-            outline: none;
+        .perfil-option:hover .option-icon {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
         }
 
-        .btn-login {
+        .option-icon i {
+            font-size: 28px;
+            color: white;
+        }
+
+        .option-info {
+            flex: 1;
+        }
+
+        .option-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a2c3e;
+        }
+
+        .option-info p {
+            margin: 0;
+            font-size: 0.75rem;
+            color: #8a9aa8;
+        }
+
+        .option-arrow {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .perfil-option:hover .option-arrow {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        .perfil-option.selected .option-arrow {
+            opacity: 1;
+        }
+
+        /* Botão de prosseguir */
+        .btn-proceed {
             background: linear-gradient(135deg, #2e7d32, #1b5e20);
             border: none;
             border-radius: 18px;
@@ -242,26 +300,58 @@
             width: 100%;
             font-size: 1rem;
             transition: all 0.3s ease;
-            margin-top: 0.8rem;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .btn-login:hover {
+        .btn-proceed:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(46, 125, 50, 0.4);
         }
 
-        .btn-login:active {
+        .btn-proceed:active {
             transform: translateY(0);
         }
 
-        .btn-login i {
-            margin-right: 8px;
+        .btn-proceed:disabled {
+            background: #bdbdbd;
+            transform: none;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
+        /* Divisor */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: #bdbdbd;
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .divider::before {
+            margin-right: 1rem;
+        }
+
+        .divider::after {
+            margin-left: 1rem;
+        }
+
+        /* Links inferiores */
         .footer-links {
             text-align: center;
-            margin-top: 1.8rem;
+            margin-top: 1.5rem;
             display: flex;
             justify-content: center;
             gap: 1.5rem;
@@ -269,8 +359,8 @@
         }
 
         .footer-link {
-            color: #757575;
-            font-size: 0.85rem;
+            color: #8a9aa8;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.3s;
             display: inline-flex;
@@ -282,10 +372,6 @@
             color: #2e7d32;
         }
 
-        .divider {
-            color: #ddd;
-        }
-
         /* Loading spinner */
         .loading-spinner {
             display: inline-block;
@@ -295,20 +381,11 @@
             border-radius: 50%;
             border-top-color: white;
             animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        input::placeholder {
-            color: #5F5F5F;
         }
 
         /* Responsividade */
         @media (max-width: 480px) {
-            .login-card {
+            .selection-card {
                 padding: 1.8rem 1.5rem;
             }
             .logo-icon {
@@ -320,6 +397,16 @@
             }
             .logo-area h1 {
                 font-size: 1.8rem;
+            }
+            .option-icon {
+                width: 50px;
+                height: 50px;
+            }
+            .option-icon i {
+                font-size: 24px;
+            }
+            .option-info h3 {
+                font-size: 1rem;
             }
         }
 
@@ -377,7 +464,7 @@
     </div>
     <div class="medical-cross"></div>
 
-    <div class="login-card">
+    <div class="selection-card">
         <div class="logo-area">
             <div class="logo-icon">
                 <i class="fas fa-hospital-user"></i>
@@ -390,23 +477,53 @@
             </div>
         </div>
 
-        <form id="loginForm">
-            <div class="input-group-custom">
-                <i class="fas fa-user-circle"></i>
-                <input type="text" class="form-control-pharma" id="username" placeholder="Nome de usuário" autocomplete="off" style="color: white" required>
+        <div class="perfil-options">
+            <!-- Opção Cliente -->
+            <div class="perfil-option" data-perfil="cliente" onclick="selectPerfil('cliente')">
+                <div class="option-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="option-info">
+                    <h3>Sou Cliente</h3>
+                    <p>Acesse sua conta, faça pedidos, consulte receitas e acompanhe entregas</p>
+                </div>
+                <div class="option-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </div>
-            <div class="input-group-custom">
-                <i class="fas fa-key"></i>
-                <input type="password" class="form-control-pharma" id="password" placeholder="Senha" style="color: white" required>
+
+            <!-- Opção Funcionário -->
+            <div class="perfil-option" data-perfil="vendedor" onclick="selectPerfil('vendedor')">
+                <div class="option-icon">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="option-info">
+                    <h3>Sou Funcionário</h3>
+                    <p>Ponto de venda, gestão de estoque, atendimento e relatórios</p>
+                </div>
+                <div class="option-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
             </div>
-            <button type="submit" class="btn-login" id="loginBtn">
-                <i class="fas fa-sign-in-alt"></i> Entrar no Sistema
-            </button>
-        </form>
+        </div>
+
+        <button class="btn-proceed" id="proceedBtn" onclick="proceedToLogin()" disabled>
+            <i class="fas fa-arrow-right"></i> Continuar
+        </button>
+
+        <div class="divider">
+            <span>Informações</span>
+        </div>
 
         <div class="footer-links">
-            <span class="footer-link" onclick="showForgotPassword()">
-                <i class="fas fa-envelope"></i> Esqueci minha senha
+            <span class="footer-link" onclick="showHelp()">
+                <i class="fas fa-question-circle"></i> Ajuda
+            </span>
+            <span class="footer-link" onclick="showContact()">
+                <i class="fas fa-phone-alt"></i> Contato
+            </span>
+            <span class="footer-link" onclick="showAbout()">
+                <i class="fas fa-info-circle"></i> Sobre
             </span>
         </div>
     </div>
@@ -427,197 +544,176 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // Função para recuperar senha por e-mail
-        window.showForgotPassword = async () => {
-            const { value: email } = await Swal.fire({
-                title: '🔐 Recuperar Senha',
-                html: `
-                    <div style="text-align: left;">
-                        <p style="color: #666; margin-bottom: 1rem;">Digite seu e-mail cadastrado para recuperar a senha.</p>
-                        <div style="display: flex;;">
-                            <input type="email" id="swal-email" class="swal2-input" placeholder="seu@email.com" style="padding-left: 40px; width: 100%;">
-                        </div>
-                    </div>
-                `,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'Enviar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#2e7d32',
-                cancelButtonColor: '#757575',
-                preConfirm: () => {
-                    const email = document.getElementById('swal-email').value;
-                    if (!email) {
-                        Swal.showValidationMessage('Digite seu e-mail!');
-                        return false;
-                    }
-                    if (!email.includes('@') || !email.includes('.')) {
-                        Swal.showValidationMessage('Digite um e-mail válido!');
-                        return false;
-                    }
-                    return email;
-                }
+        let selectedPerfil = null;
+
+        // Função para selecionar perfil
+        function selectPerfil(perfil) {
+            selectedPerfil = perfil;
+            
+            // Remover seleção de todos
+            document.querySelectorAll('.perfil-option').forEach(opt => {
+                opt.classList.remove('selected');
             });
-
-            if (email) {
-                // Buscar usuário pelo e-mail (campo email nos usuários)
-                const snapshot = await database.ref('usuarios').orderByChild('email').equalTo(email).once('value');
-                const user = snapshot.val();
-                
-                if (user) {
-                    const userId = Object.keys(user)[0];
-                    const userData = user[userId];
-                    
-                    // Gerar nova senha temporária
-                    const tempPassword = Math.random().toString(36).substring(2, 10);
-                    
-                    // Atualizar senha no banco
-                    await database.ref('usuarios/' + userId).update({
-                        senha: tempPassword,
-                        senhaTemporaria: true,
-                        dataResetSenha: new Date().toISOString()
-                    });
-                    
-                    // Registrar log
-                    await database.ref('logs/' + Date.now()).set({
-                        acao: 'Recuperação de Senha',
-                        usuario: userData.nome,
-                        detalhes: `Solicitação de recuperação de senha via e-mail: ${email}`,
-                        data: new Date().toISOString()
-                    });
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'E-mail Enviado!',
-                        html: `
-                            <div style="text-align: left;">
-                                <p>Uma nova senha temporária foi gerada.</p>
-                                <p><strong>Usuário:</strong> ${userData.usuario}</p>
-                                <p><strong>Nova senha:</strong> <code style="background: #f0f0f0; padding: 4px 8px; border-radius: 6px;">${tempPassword}</code></p>
-                                <hr>
-                                <p class="text-muted" style="font-size: 0.85rem;">Por segurança, altere sua senha após o primeiro login.</p>
-                            </div>
-                        `,
-                        confirmButtonText: 'OK',
-                        confirmButtonColor: '#2e7d32'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'E-mail não encontrado',
-                        text: 'Nenhum usuário cadastrado com este e-mail. Verifique ou contate o administrador.',
-                        confirmButtonColor: '#2e7d32'
-                    });
-                }
+            
+            // Adicionar seleção ao clicado
+            const selectedOption = document.querySelector(`.perfil-option[data-perfil="${perfil}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('selected');
             }
-        };
+            
+            // Habilitar botão
+            const proceedBtn = document.getElementById('proceedBtn');
+            proceedBtn.disabled = false;
+            
+            // Mudar texto do botão baseado no perfil
+            if (perfil === 'cliente') {
+                proceedBtn.innerHTML = '<i class="fas fa-user"></i> Entrar como Cliente';
+            } else if (perfil === 'vendedor') {
+                proceedBtn.innerHTML = '<i class="fas fa-briefcase"></i> Entrar como Funcionário';
+            }
+        }
 
-        // Login - Apenas nome de usuário e senha
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
-            
-            if (!username || !password) {
+        // Prosseguir para o login correspondente
+        function proceedToLogin() {
+            if (!selectedPerfil) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Campos vazios',
-                    text: 'Preencha o nome de usuário e a senha!',
+                    title: 'Selecione um perfil',
+                    text: 'Por favor, selecione como deseja acessar o sistema.',
                     confirmButtonColor: '#2e7d32'
                 });
                 return;
             }
-            
-            // Loading
-            loginBtn.innerHTML = '<span class="loading-spinner"></span> Autenticando...';
-            loginBtn.disabled = true;
 
-            try {
-                const snapshot = await database.ref('usuarios').once('value');
-                const users = snapshot.val();
-                let authenticated = false;
-                let userData = null;
+            // Registrar log de tentativa de acesso
+            if (database) {
+                database.ref('logs/' + Date.now()).set({
+                    acao: 'Seleção de Perfil',
+                    detalhes: `Usuário selecionou perfil: ${selectedPerfil}`,
+                    data: new Date().toISOString()
+                }).catch(e => console.log("Log não registrado:", e));
+            }
 
-                if (users) {
-                    for (let key in users) {
-                        const user = users[key];
-                        if (user.usuario === username && user.senha === password) {
-                            authenticated = true;
-                            userData = user;
-                            break;
-                        }
-                    }
-                }
+            // Redirecionar baseado no perfil
+            if (selectedPerfil === 'cliente') {
+                // Cliente - vai para a página do cliente
+                window.location.href = 'cliente.html';
+            } else if (selectedPerfil === 'vendedor') {
+                // Funcionário - vai para a página de login
+                window.location.href = 'login.html';
+            }
+        }
 
-                if (authenticated) {
-                    // Verificar se é senha temporária
-                    let message = `Olá ${userData.nome}, acesso permitido!`;
-                    if (userData.senhaTemporaria) {
-                        message = `Olá ${userData.nome}! Esta é uma senha temporária. Por favor, altere sua senha em: Configurações > Alterar Senha.`;
-                        // Remover flag de senha temporária
-                        await database.ref('usuarios/' + userData.uid).update({ senhaTemporaria: false });
-                    }
-                    
-                    // Salvar sessão
-                    localStorage.setItem('sandgest_user', JSON.stringify({
-                        uid: userData.uid,
-                        nome: userData.nome,
-                        tipo: userData.tipo
-                    }));
-                    
-                    // Registrar log de login
-                    await database.ref('logs/' + Date.now()).set({
-                        acao: 'Login',
-                        usuario: userData.nome,
-                        detalhes: 'Login realizado com sucesso',
-                        data: new Date().toISOString()
-                    });
-                    
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Bem-vindo!',
-                        text: message,
-                        timer: 2000,
-                        showConfirmButton: true,
-                        confirmButtonColor: '#2e7d32',
-                        didClose: () => {
-                            window.location.href = 'func.html';
-                        }
-                    });
-                } else {
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar no Sistema';
-                    loginBtn.disabled = false;
-                    
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Acesso Negado',
-                        text: 'Nome de usuário ou senha incorretos!',
-                        confirmButtonColor: '#2e7d32'
-                    });
-                }
-            } catch (error) {
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Entrar no Sistema';
-                loginBtn.disabled = false;
+        // Funções auxiliares
+        function showHelp() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Como acessar o sistema?',
+                html: `
+                    <div style="text-align: left;">
+                        <p><strong>👤 Cliente:</strong> Utilize seu e-mail e senha cadastrados. Se ainda não tem conta, crie uma na área do cliente.</p>
+                        <p><strong>👔 Funcionário:</strong> Utilize o nome de usuário e senha fornecidos pelo administrador.</p>
+                        <hr>
+                        <p class="text-muted">Em caso de dúvidas, entre em contato com o suporte.</p>
+                    </div>
+                `,
+                confirmButtonColor: '#2e7d32'
+            });
+        }
+
+        function showContact() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Contato',
+                html: `
+                    <div style="text-align: center;">
+                        <p><i class="fas fa-phone-alt"></i> <strong>Telefone:</strong> (XX) XXXX-XXXX</p>
+                        <p><i class="fas fa-envelope"></i> <strong>E-mail:</strong> contato@farmaciaalegria.com</p>
+                        <p><i class="fab fa-whatsapp"></i> <strong>WhatsApp:</strong> (XX) 9XXXX-XXXX</p>
+                        <hr>
+                        <p><strong>Horário de Atendimento:</strong></p>
+                        <p>Segunda a Sexta: 08h às 20h<br>Sábado: 08h às 14h</p>
+                    </div>
+                `,
+                confirmButtonColor: '#2e7d32'
+            });
+        }
+
+        function showAbout() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Farmácia Alegria Pharma',
+                html: `
+                    <div style="text-align: center;">
+                        <i class="fas fa-capsules" style="font-size: 48px; color: #2e7d32; margin-bottom: 10px;"></i>
+                        <p><strong>Versão:</strong> 2.0.0</p>
+                        <p><strong>Sistema de Gestão Farmacêutica</strong></p>
+                        <p>Desenvolvido para otimizar o atendimento e gestão da farmácia.</p>
+                        <hr>
+                        <p class="text-muted">© 2024 Farmácia Alegria - Todos os direitos reservados</p>
+                    </div>
+                `,
+                confirmButtonColor: '#2e7d32'
+            });
+        }
+
+        // Permitir navegação com teclado (setas)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                const options = ['cliente', 'vendedor'];
+                let currentIndex = selectedPerfil ? options.indexOf(selectedPerfil) : -1;
                 
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro de Conexão',
-                    text: 'Não foi possível conectar ao servidor. Verifique sua internet.',
-                    confirmButtonColor: '#2e7d32'
-                });
-                console.error("Erro no login:", error);
+                if (e.key === 'ArrowDown') {
+                    currentIndex = (currentIndex + 1) % options.length;
+                } else if (e.key === 'ArrowUp') {
+                    currentIndex = (currentIndex - 1 + options.length) % options.length;
+                }
+                
+                if (currentIndex !== -1) {
+                    selectPerfil(options[currentIndex]);
+                }
+            } else if (e.key === 'Enter' && selectedPerfil) {
+                proceedToLogin();
             }
         });
 
-        // Enter key submit
-        document.getElementById('username').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-        });
-        document.getElementById('password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-        });
+        // Verificar se já existe sessão ativa (opcional)
+        function checkActiveSession() {
+            const userSession = localStorage.getItem('sandgest_user');
+            const clientSession = localStorage.getItem('sandgest_cliente');
+            
+            if (userSession || clientSession) {
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Sessão ativa encontrada',
+                    text: 'Você já possui uma sessão ativa. Deseja continuar ou fazer novo login?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Continuar sessão',
+                    cancelButtonText: 'Novo login',
+                    confirmButtonColor: '#2e7d32',
+                    cancelButtonColor: '#757575'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (userSession) {
+                            const user = JSON.parse(userSession);
+                            if (user.tipo === 'admin') {
+                                window.location.href = 'dashboard.html';
+                            } else {
+                                window.location.href = 'func.html';
+                            }
+                        } else if (clientSession) {
+                            window.location.href = 'cliente.html';
+                        }
+                    } else {
+                        localStorage.removeItem('sandgest_user');
+                        localStorage.removeItem('sandgest_cliente');
+                    }
+                });
+            }
+        }
+        
+        // Descomente a linha abaixo se quiser verificar sessão ativa ao carregar
+        // checkActiveSession();
     </script>
 </body>
 </html>
