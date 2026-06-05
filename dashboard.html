@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Farmácia Alegria</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
+            padding-bottom: 80px;
+        }
+        
+        /* Estilo Farmácia - Cores profissionais */
+        .pharma-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .glass-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+        }
+        
+        /* Menu inferior */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 20px;
+            border-top: 2px solid #2e7d32;
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .nav-item {
+            text-align: center;
+            color: #757575;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        .nav-item.active,
+        .nav-item:hover {
+            color: #2e7d32;
+        }
+        
+        .nav-item span {
+            display: block;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+        
+        .nav-item i {
+            font-size: 22px;
+        }
+        
+        /* Formulários */
+        .form-control-pharma {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            color: #333;
+            border-radius: 12px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        
+        .form-control-pharma:focus {
+            border-color: #2e7d32;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+            outline: none;
+            background: #fff;
+        }
+        
+        .form-label {
+            color: #555;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            font-weight: 500;
+        }
+        
+        .btn-primary-pharma {
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-weight: 600;
+            color: #ffffff;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary-pharma:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+        
+        .btn-outline-pharma {
+            background: transparent;
+            border: 1px solid #2e7d32;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-weight: 500;
+            color: #2e7d32;
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-pharma:hover {
+            background: #2e7d32;
+            color: white;
+        }
+        
+        /* Cards de estatísticas */
+        .stat-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+            border-left: 4px solid #2e7d32;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            height: 100%;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.75rem;
+        }
+        
+        .dashboard-icon {
+            font-size: 2rem;
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Cards de produtos */
+        .product-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid #e8e8e8;
+        }
+        
+        .product-card.in-stock {
+            border-left: 4px solid #4caf50;
+        }
+        
+        .product-card.low-stock {
+            border-left: 4px solid #ff9800;
+        }
+        
+        .product-card.out-stock {
+            border-left: 4px solid #f44336;
+        }
+        
+        .product-image-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #f5f5f5;
+        }
+        
+        /* Cards de funcionários */
+        .funcionario-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border: 1px solid #e8e8e8;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .funcionario-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+        
+        .funcionario-card.admin {
+            border-left: 4px solid #ff9800;
+            background: linear-gradient(135deg, #fff8e1, #ffffff);
+        }
+        
+        .funcionario-card.vendedor {
+            border-left: 4px solid #2e7d32;
+        }
+        
+        /* Log entries */
+        .log-entry {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            border: 1px solid #eee;
+        }
+        
+        /* Badges */
+        .badge-pharma {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+        }
+        
+        /* Títulos */
+        h1, h2, h3, h4, h5, h6 {
+            color: #1b5e20;
+        }
+        
+        .text-pharma {
+            color: #2e7d32;
+        }
+        
+        /* Progress Steps */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .step {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: #e0e0e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .step.active .step-number {
+            background: #2e7d32;
+            color: white;
+        }
+        
+        .step.completed .step-number {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .step-title {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .step.active .step-title {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .step.completed .step-title {
+            color: #4caf50;
+        }
+        
+        .step-content {
+            display: none;
+        }
+        
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Image upload */
+        .image-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .image-upload-area:hover {
+            border-color: #2e7d32;
+            background: #f5f5f5;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+        
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2e7d32;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Header com foto do perfil */
+        .pharma-header {
+            background: linear-gradient(135deg, #1b5e20, #2e7d32);
+            padding: 12px 20px;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .perfil-btn {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .perfil-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="pharma-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div style="background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
+                    <i class="fas fa-capsules fa-lg"></i>
+                </div>
+                <div>
+                    <h5 style="margin: 0; font-weight: 700;">Farmácia Alegia</h5>
+                    <small style="opacity: 0.9;">Administrador</small>
+                </div>
+            </div>
+            <div class="perfil-btn" onclick="changePage('perfil')">
+                <i class="fas fa-user-circle"></i>
+                <span id="adminNomeHeader">Administrador</span>
+                <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div id="app" style="padding: 20px; padding-bottom: 80px;"></div>
+
+    <!-- Menu inferior -->
+    <div class="bottom-nav">
+        <div class="nav-item" data-page="dashboard">
+            <i class="fas fa-chalkboard-user"></i>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-item" data-page="estoque">
+            <i class="fas fa-pills"></i>
+            <span>Estoque</span>
+        </div>
+        <div class="nav-item" data-page="vendas">
+            <i class="fas fa-chart-line"></i>
+            <span>Vendas</span>
+        </div>
+        <div class="nav-item" data-page="relatorios">
+            <i class="fas fa-chart-pie"></i>
+            <span>Relatórios</span>
+        </div>
+        <div class="nav-item" data-page="logs">
+            <i class="fas fa-history"></i>
+            <span>Logs</span>
+        </div>
+        <div class="nav-item" data-page="funcionarios">
+            <i class="fas fa-users"></i>
+            <span>Funcionários</span>
+        </div>
+    </div>
+
+    <!-- Modal de Produto com Etapas -->
+    <div class="modal fade" id="productModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white;">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-capsules"></i> Cadastrar Produto
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Etapas -->
+                    <div class="steps">
+                        <div class="step" data-step="1">
+                            <div class="step-number">1</div>
+                            <div class="step-title">Informações Básicas</div>
+                        </div>
+                        <div class="step" data-step="2">
+                            <div class="step-number">2</div>
+                            <div class="step-title">Datas & Tipo</div>
+                        </div>
+                        <div class="step" data-step="3">
+                            <div class="step-number">3</div>
+                            <div class="step-title">Imagem & Descrição</div>
+                        </div>
+                    </div>
+                    
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        
+                        <!-- Etapa 1 - Informações Básicas -->
+                        <div class="step-content" data-step="1">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">ID Único *</label>
+                                    <input type="text" class="form-control-pharma" id="prodIdUnico" readonly placeholder="Gerado automaticamente">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Nome do Produto *</label>
+                                    <input type="text" class="form-control-pharma" id="prodNome" placeholder="Ex: Paracetamol 500mg" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Fabricante/Origem *</label>
+                                    <input type="text" class="form-control-pharma" id="prodOrigem" placeholder="Ex: EMS, Neo Química, Genérico" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Quantidade em Estoque *</label>
+                                    <input type="number" class="form-control-pharma" id="prodQuantidade" placeholder="0" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preço de Venda (Kz) *</label>
+                                    <input type="number" step="1" class="form-control-pharma" id="prodPreco" placeholder="0" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Etapa 2 - Datas & Tipo -->
+                        <div class="step-content" data-step="2">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Data de Produção *</label>
+                                    <input type="date" class="form-control-pharma" id="prodDataProducao" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Data de Validade *</label>
+                                    <input type="date" class="form-control-pharma" id="prodDataValidade" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Tipo do Medicamento *</label>
+                                    <select class="form-control-pharma" id="prodTipo" required>
+                                        <option value="">Selecione o tipo...</option>
+                                        <option value="comprimido">💊 Comprimido Comum</option>
+                                        <option value="capsula">💊 Cápsula</option>
+                                        <option value="draagea">💊 Drágea</option>
+                                        <option value="sublingual">💊 Sublingual</option>
+                                        <option value="revestido">💊 Revestido</option>
+                                        <option value="liberacao">💊 Liberação Prolongada</option>
+                                        <option value="xarope">🧪 Xarope</option>
+                                        <option value="pomada">🧴 Pomada/Creme</option>
+                                        <option value="injetavel">💉 Injetável</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Etapa 3 - Imagem & Descrição -->
+                        <div class="step-content" data-step="3">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label">Imagem do Produto</label>
+                                    <div class="image-upload-area" id="imageUploadArea">
+                                        <i class="fas fa-cloud-upload-alt fa-2x" style="color: #2e7d32;"></i>
+                                        <p class="mb-0">Clique para fazer upload da imagem</p>
+                                        <input type="file" id="prodImagem" accept="image/*" style="display: none;">
+                                        <div id="imagePreviewContainer"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Descrição do Produto</label>
+                                    <textarea class="form-control-pharma" id="prodDescricao" rows="4" placeholder="Informações adicionais, indicações, contraindicações..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">Voltar</button>
+                    <button type="button" class="btn-primary-pharma" id="nextBtn" onclick="changeStep(1)">Próximo</button>
+                    <button type="button" class="btn-primary-pharma" id="saveBtn" onclick="saveProduct()" style="background: #4caf50; display: none;">Salvar Produto</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Produto -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle"></i> Detalhes do Produto
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Funcionário -->
+    <div class="modal fade" id="funcionarioModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus"></i> Cadastrar Funcionário
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="funcionarioForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nome Completo *</label>
+                            <input type="text" class="form-control-pharma" id="funcNome" placeholder="Ex: João Silva" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">E-mail *</label>
+                            <input type="email" class="form-control-pharma" id="funcEmail" placeholder="joao@email.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Usuário *</label>
+                            <input type="text" class="form-control-pharma" id="funcUsuario" placeholder="Nome de login" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Senha *</label>
+                            <input type="password" class="form-control-pharma" id="funcSenha" placeholder="Mínimo 4 caracteres" required>
+                        </div>
+                    </form>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle"></i> Todos os funcionários cadastrados terão permissão de <strong>VENDEDOR</strong>. Apenas o Administrador Master tem acesso total.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn-primary-pharma" onclick="salvarFuncionario()">Cadastrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes do Funcionário -->
+    <div class="modal fade" id="funcionarioDetailModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-circle"></i> Detalhes do Funcionário
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="funcionarioDetailContent"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Perfil -->
+    <div class="modal fade" id="perfilModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2e7d32, #1b5e20); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-circle"></i> Meu Perfil
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="perfilContent"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvDc46HzQviKzniF05xH6dMuOtKtsbQYQ",
+            authDomain: "sandfarma-b2170.firebaseapp.com",
+            databaseURL: "https://sandfarma-b2170-default-rtdb.firebaseio.com",
+            projectId: "sandfarma-b2170",
+            storageBucket: "sandfarma-b2170.firebasestorage.app",
+            messagingSenderId: "27746642641",
+            appId: "1:27746642641:web:a0fc437da19b07178e33f0"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let currentPage = 'dashboard';
+        let currentUser = {
+            nome: "Administrador Master",
+            tipo: "admin",
+            permissao: "total",
+            uid: "admin_000"
+        };
+        
+        let produtosCache = [];
+        let entradasSaidasCache = [];
+        let logsCache = [];
+        let funcionariosCache = [];
+        let selectedImageBase64 = null;
+        let currentStep = 1;
+        let editMode = false;
+        
+        function formatKwanza(value) {
+            return new Intl.NumberFormat('pt-AO', {
+                style: 'currency',
+                currency: 'AOA',
+                minimumFractionDigits: 0
+            }).format(value);
+        }
+        
+        function gerarIdUnico() {
+            const prefixo = "MED";
+            const timestamp = Date.now().toString().slice(-8);
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `${prefixo}-${timestamp}-${random}`;
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const [year, month, day] = dateStr.split('-');
+            return `${day}/${month}/${year}`;
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function showToast(msg, type = 'success') {
+            Swal.fire({
+                text: msg,
+                icon: type === 'error' ? 'error' : 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                background: type === 'error' ? '#f44336' : '#4caf50',
+                color: 'white'
+            });
+        }
+        
+        function setupImageUpload() {
+            const uploadArea = document.getElementById('imageUploadArea');
+            const fileInput = document.getElementById('prodImagem');
+            
+            if (uploadArea) {
+                uploadArea.onclick = () => fileInput.click();
+                
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            selectedImageBase64 = event.target.result;
+                            const previewContainer = document.getElementById('imagePreviewContainer');
+                            previewContainer.innerHTML = `<img src="${selectedImageBase64}" class="image-preview" alt="Preview">`;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+            }
+        }
+        
+        function changeStep(direction) {
+            const newStep = currentStep + direction;
+            if (newStep < 1 || newStep > 3) return;
+            
+            // Validate current step before proceeding
+            if (direction === 1) {
+                if (currentStep === 1) {
+                    const nome = document.getElementById('prodNome').value;
+                    const origem = document.getElementById('prodOrigem').value;
+                    const quantidade = document.getElementById('prodQuantidade').value;
+                    const preco = document.getElementById('prodPreco').value;
+                    
+                    if (!nome || !origem || !quantidade || !preco) {
+                        showToast("Preencha todos os campos da etapa 1!", "error");
+                        return;
+                    }
+                } else if (currentStep === 2) {
+                    const dataProducao = document.getElementById('prodDataProducao').value;
+                    const dataValidade = document.getElementById('prodDataValidade').value;
+                    const tipo = document.getElementById('prodTipo').value;
+                    
+                    if (!dataProducao || !dataValidade || !tipo) {
+                        showToast("Preencha todos os campos da etapa 2!", "error");
+                        return;
+                    }
+                }
+            }
+            
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.remove('active');
+            
+            currentStep = newStep;
+            
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+            document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.add('active');
+            
+            // Update buttons
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            if (currentStep === 1) {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+            } else if (currentStep === 3) {
+                prevBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+            } else {
+                prevBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+            }
+        }
+        
+        function resetSteps() {
+            currentStep = 1;
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelector('.step[data-step="1"]').classList.add('active');
+            document.querySelector('.step-content[data-step="1"]').classList.add('active');
+            
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
+        }
+        
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (currentPage === 'dashboard') {
+                app.innerHTML = renderDashboard();
+                carregarDashboard();
+            } else if (currentPage === 'estoque') {
+                app.innerHTML = renderEstoque();
+                carregarEstoque();
+            } else if (currentPage === 'vendas') {
+                app.innerHTML = renderVendas();
+                carregarVendas();
+            } else if (currentPage === 'relatorios') {
+                app.innerHTML = renderRelatorios();
+                carregarRelatorios();
+            } else if (currentPage === 'logs') {
+                app.innerHTML = renderLogs();
+                carregarLogs();
+            } else if (currentPage === 'funcionarios') {
+                app.innerHTML = renderFuncionarios();
+                carregarFuncionarios();
+            } else if (currentPage === 'perfil') {
+                app.innerHTML = renderPerfil();
+                carregarPerfil();
+            }
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === currentPage) {
+                    item.classList.add('active');
+                }
+            });
+        }
+        
+        // ==================== DASHBOARD ====================
+        function renderDashboard() {
+            return `
+                <div class="pharma-card" style="background: linear-gradient(135deg, #1b5e20, #2e7d32); color: white;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div>
+                            <h3 style="color: white; margin: 0;">
+                                <i class="fas fa-chart-line"></i> Dashboard
+                            </h3>
+                            <small style="opacity: 0.9;">Visão geral do sistema</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" onclick="changePage('estoque')">
+                            <i class="fas fa-pills dashboard-icon"></i>
+                            <div class="stat-value" id="totalProdutos">0</div>
+                            <div class="stat-label">Produtos em Estoque</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" onclick="changePage('vendas')" style="border-left-color: #ff9800;">
+                            <i class="fas fa-chart-line dashboard-icon" style="color: #ff9800;"></i>
+                            <div class="stat-value" id="vendasHoje" style="color: #ff9800;">0 Kz</div>
+                            <div class="stat-label">Vendas Hoje</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" style="border-left-color: #f44336;">
+                            <i class="fas fa-exclamation-triangle dashboard-icon" style="color: #f44336;"></i>
+                            <div class="stat-value" id="estoqueCritico" style="color: #f44336;">0</div>
+                            <div class="stat-label">Estoque Baixo (≤5)</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" onclick="changePage('funcionarios')" style="border-left-color: #9c27b0;">
+                            <i class="fas fa-users dashboard-icon" style="color: #9c27b0;"></i>
+                            <div class="stat-value" id="totalFuncionarios">0</div>
+                            <div class="stat-label">Funcionários</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <h5><i class="fas fa-chart-line"></i> Vendas - Últimos 7 Dias</h5>
+                    <canvas id="salesChart" height="200"></canvas>
+                </div>
+                
+                <div class="glass-card">
+                    <h5><i class="fas fa-trophy"></i> Top Vendedores - Esta Semana</h5>
+                    <div id="topVendedores"></div>
+                </div>
+            `;
+        }
+        
+        async function carregarDashboard() {
+            const snapshotProdutos = await database.ref('produtos').once('value');
+            const produtos = snapshotProdutos.val() || {};
+            let total = 0, critico = 0;
+            
+            for (let key in produtos) {
+                total += parseInt(produtos[key].quantidade) || 0;
+                if (parseInt(produtos[key].quantidade) <= 5) critico++;
+            }
+            
+            document.getElementById('totalProdutos').innerText = total;
+            document.getElementById('estoqueCritico').innerText = critico;
+            
+            const snapshotUsers = await database.ref('usuarios').once('value');
+            const users = snapshotUsers.val() || {};
+            let totalUsers = 0;
+            for (let key in users) totalUsers++;
+            document.getElementById('totalFuncionarios').innerText = totalUsers;
+            
+            const snapshotVendas = await database.ref('vendas').once('value');
+            const vendas = snapshotVendas.val() || {};
+            const hoje = new Date().toISOString().split('T')[0];
+            let vendasHoje = 0;
+            let vendasPorVendedor = {};
+            let ultimos7Dias = [];
+            
+            for (let key in vendas) {
+                const v = vendas[key];
+                if (v.data === hoje) vendasHoje += v.total || 0;
+                
+                const dataVenda = new Date(v.data);
+                const diasDiff = (new Date() - dataVenda) / (1000 * 60 * 60 * 24);
+                if (diasDiff <= 7) {
+                    vendasPorVendedor[v.vendedor] = (vendasPorVendedor[v.vendedor] || 0) + (v.total || 0);
+                }
+            }
+            
+            document.getElementById('vendasHoje').innerHTML = formatKwanza(vendasHoje);
+            
+            const topVendedores = Object.entries(vendasPorVendedor).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            const topDiv = document.getElementById('topVendedores');
+            
+            if (topVendedores.length === 0) {
+                topDiv.innerHTML = '<div class="text-muted text-center">Nenhuma venda nesta semana</div>';
+            } else {
+                topDiv.innerHTML = topVendedores.map(([nome, total]) => `
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background: #f5f5f5; border-radius: 12px;">
+                        <span><i class="fas fa-user-circle"></i> ${nome}</span>
+                        <strong class="text-success">${formatKwanza(total)}</strong>
+                    </div>
+                `).join('');
+            }
+            
+            for (let i = 6; i >= 0; i--) {
+                const data = new Date();
+                data.setDate(data.getDate() - i);
+                const dataStr = data.toISOString().split('T')[0];
+                let totalVendas = 0;
+                
+                for (let key in vendas) {
+                    if (vendas[key].data === dataStr) {
+                        totalVendas += vendas[key].total || 0;
+                    }
+                }
+                ultimos7Dias.push(totalVendas);
+            }
+            
+            const ctx = document.getElementById('salesChart')?.getContext('2d');
+            if (ctx) {
+                if (window.adminChart) window.adminChart.destroy();
+                window.adminChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Dia 6', 'Dia 5', 'Dia 4', 'Dia 3', 'Dia 2', 'Ontem', 'Hoje'],
+                        datasets: [{
+                            label: 'Vendas (Kz)',
+                            data: ultimos7Dias,
+                            borderColor: '#2e7d32',
+                            backgroundColor: 'rgba(46, 125, 50, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: (v) => formatKwanza(v)
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // ==================== ESTOQUE ====================
+        function renderEstoque() {
+            return `
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                    <h4 style="color: #2e7d32; margin: 0;">
+                        <i class="fas fa-pills"></i> Gestão de Estoque
+                    </h4>
+                    <button class="btn-primary-pharma" onclick="showProductModal()" style="width: auto; padding: 8px 16px;">
+                        <i class="fas fa-plus"></i> Novo Produto
+                    </button>
+                </div>
+                
+                <div class="glass-card mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border">
+                            <i class="fas fa-search text-success"></i>
+                        </span>
+                        <input type="text" class="form-control-pharma" id="searchProduto" placeholder="Buscar por nome, ID ou fabricante...">
+                    </div>
+                </div>
+                
+                <div id="produtosList"></div>
+            `;
+        }
+        
+        async function carregarEstoque() {
+            const snapshot = await database.ref('produtos').once('value');
+            const produtos = snapshot.val() || {};
+            produtosCache = Object.entries(produtos).map(([id, p]) => ({ id, ...p }));
+            
+            const searchInput = document.getElementById('searchProduto');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => filtrarProdutos(e.target.value));
+            }
+            
+            filtrarProdutos('');
+        }
+        
+        function filtrarProdutos(search) {
+            const searchLower = search.toLowerCase();
+            const filtered = produtosCache.filter(p =>
+                p.nome?.toLowerCase().includes(searchLower) ||
+                p.idUnico?.toLowerCase().includes(searchLower) ||
+                p.origem?.toLowerCase().includes(searchLower)
+            );
+            renderProdutosList(filtered);
+        }
+        
+        function renderProdutosList(produtos) {
+            const container = document.getElementById('produtosList');
+            if (!container) return;
+            
+            if (produtos.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-4">Nenhum produto cadastrado</div>';
+                return;
+            }
+            
+            const hoje = new Date();
+            let html = '';
+            
+            for (const p of produtos) {
+                const dataValidade = new Date(p.dataValidade);
+                const diffDays = Math.ceil((dataValidade - hoje) / (1000 * 60 * 60 * 24));
+                let statusClass = 'in-stock';
+                let statusText = '';
+                
+                if (diffDays <= 0) {
+                    statusClass = 'out-stock';
+                    statusText = '<span class="badge bg-danger">VENCIDO</span>';
+                } else if (diffDays <= 30) {
+                    statusClass = 'low-stock';
+                    statusText = '<span class="badge bg-warning text-dark">Vence em ' + diffDays + ' dias</span>';
+                }
+                
+                if (p.quantidade <= 5 && p.quantidade > 0 && diffDays > 0) {
+                    statusClass = 'low-stock';
+                    statusText = '<span class="badge bg-warning text-dark">Estoque Baixo</span>';
+                } else if (p.quantidade === 0) {
+                    statusClass = 'out-stock';
+                    statusText = '<span class="badge bg-danger">SEM ESTOQUE</span>';
+                }
+                
+                const imagemHtml = p.imagem ? 
+                    `<img src="${p.imagem}" class="product-image-preview" style="width: 50px; height: 50px; object-fit: cover; border-radius: 10px;">` :
+                    `<div style="width: 50px; height: 50px; background: #e8f5e9; border-radius: 10px; display: flex; align-items: center; justify-content: center;"><i class="fas fa-capsules" style="color: #2e7d32;"></i></div>`;
+                
+                html += `
+                    <div class="product-card ${statusClass}">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap">
+                            <div class="d-flex gap-3 flex-grow-1">
+                                ${imagemHtml}
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between flex-wrap">
+                                        <div>
+                                            <strong style="color: #333;">${escapeHtml(p.nome)}</strong>
+                                            <br>
+                                            <small class="text-muted">ID: ${escapeHtml(p.idUnico)}</small>
+                                        </div>
+                                        ${statusText}
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <small>🏭 ${escapeHtml(p.origem)}</small>
+                                            <br>
+                                            <small>💊 ${p.tipo}</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <small>📅 Val: ${formatDate(p.dataValidade)}</small>
+                                            <br>
+                                            <small>📦 Qtd: ${p.quantidade}</small>
+                                            <br>
+                                            <strong class="text-success">💰 ${formatKwanza(p.preco)}</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 ms-2 mt-2 mt-sm-0">
+                                <button class="btn btn-sm btn-outline-info" onclick="viewDetails('${p.id}')" title="Detalhes">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="editProduct('${p.id}')" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${p.id}')" title="Excluir">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="registrarSaida('${p.id}')" title="Dar Baixa">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        window.showProductModal = (editId = null) => {
+            const modalElement = document.getElementById('productModal');
+            const modal = new bootstrap.Modal(modalElement);
+            
+            document.getElementById('productForm').reset();
+            document.getElementById('productId').value = '';
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-capsules"></i> Cadastrar Produto';
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            selectedImageBase64 = null;
+            editMode = false;
+            
+            resetSteps();
+            
+            if (editId) {
+                const produto = produtosCache.find(p => p.id === editId);
+                if (produto) {
+                    document.getElementById('productId').value = produto.id;
+                    document.getElementById('prodIdUnico').value = produto.idUnico;
+                    document.getElementById('prodNome').value = produto.nome;
+                    document.getElementById('prodOrigem').value = produto.origem;
+                    document.getElementById('prodQuantidade').value = produto.quantidade;
+                    document.getElementById('prodPreco').value = produto.preco;
+                    document.getElementById('prodDataProducao').value = produto.dataProducao;
+                    document.getElementById('prodDataValidade').value = produto.dataValidade;
+                    document.getElementById('prodTipo').value = produto.tipo;
+                    document.getElementById('prodDescricao').value = produto.descricao || '';
+                    if (produto.imagem) {
+                        document.getElementById('imagePreviewContainer').innerHTML = `<img src="${produto.imagem}" class="image-preview" alt="Preview">`;
+                        selectedImageBase64 = produto.imagem;
+                    }
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Produto';
+                    editMode = true;
+                }
+            } else {
+                document.getElementById('prodIdUnico').value = gerarIdUnico();
+            }
+            
+            setupImageUpload();
+            modal.show();
+        };
+        
+        window.viewDetails = (id) => {
+            const produto = produtosCache.find(p => p.id === id);
+            if (!produto) return;
+            
+            const imagemHtml = produto.imagem ? 
+                `<div class="text-center mb-3"><img src="${produto.imagem}" style="max-width: 150px; border-radius: 12px;"></div>` : '';
+            
+            const content = `
+                ${imagemHtml}
+                <p><strong>ID Único:</strong> ${escapeHtml(produto.idUnico)}</p>
+                <p><strong>Nome:</strong> ${escapeHtml(produto.nome)}</p>
+                <p><strong>Fabricante:</strong> ${escapeHtml(produto.origem)}</p>
+                <p><strong>Tipo:</strong> ${produto.tipo}</p>
+                <p><strong>Quantidade:</strong> ${produto.quantidade} unidades</p>
+                <p><strong>Preço:</strong> ${formatKwanza(produto.preco)}</p>
+                <p><strong>Data Produção:</strong> ${formatDate(produto.dataProducao)}</p>
+                <p><strong>Data Validade:</strong> ${formatDate(produto.dataValidade)}</p>
+                <p><strong>Descrição:</strong> ${produto.descricao || 'N/A'}</p>
+                <p><strong>Última atualização:</strong> ${new Date(produto.dataAtualizacao).toLocaleString()}</p>
+            `;
+            
+            document.getElementById('detailContent').innerHTML = content;
+            const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+            modal.show();
+        };
+        
+        window.editProduct = (id) => {
+            showProductModal(id);
+        };
+        
+        window.saveProduct = async () => {
+            const id = document.getElementById('productId').value || Date.now().toString();
+            const idUnico = document.getElementById('prodIdUnico').value;
+            const nome = document.getElementById('prodNome').value;
+            const origem = document.getElementById('prodOrigem').value;
+            const quantidade = parseInt(document.getElementById('prodQuantidade').value);
+            const preco = parseFloat(document.getElementById('prodPreco').value);
+            const dataProducao = document.getElementById('prodDataProducao').value;
+            const dataValidade = document.getElementById('prodDataValidade').value;
+            const tipo = document.getElementById('prodTipo').value;
+            
+            if (!nome || !origem || !quantidade || !preco || !dataProducao || !dataValidade || !tipo) {
+                showToast("Preencha todos os campos obrigatórios!", "error");
+                return;
+            }
+            
+            const produto = {
+                idUnico: idUnico || gerarIdUnico(),
+                nome: nome,
+                origem: origem,
+                quantidade: quantidade,
+                preco: preco,
+                dataProducao: dataProducao,
+                dataValidade: dataValidade,
+                tipo: tipo,
+                descricao: document.getElementById('prodDescricao').value,
+                imagem: selectedImageBase64 || null,
+                dataAtualizacao: new Date().toISOString()
+            };
+            
+            await database.ref('produtos/' + id).set(produto);
+            
+            if (!editMode) {
+                await database.ref('entradas_saidas/' + Date.now()).set({
+                    produtoId: id,
+                    produtoNome: nome,
+                    tipo: 'ENTRADA',
+                    quantidade: quantidade,
+                    usuario: currentUser.nome,
+                    data: new Date().toISOString()
+                });
+            }
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+            modal.hide();
+            
+            showToast(editMode ? "Produto atualizado com sucesso!" : "Produto cadastrado com sucesso!");
+            carregarEstoque();
+            carregarDashboard();
+        };
+        
+        window.registrarSaida = async (id) => {
+            const produto = produtosCache.find(p => p.id === id);
+            if (!produto) return;
+            
+            const { value: qtd } = await Swal.fire({
+                title: 'Dar Baixa no Estoque',
+                text: `Estoque atual: ${produto.quantidade} unidades`,
+                input: 'number',
+                inputLabel: 'Quantidade a dar baixa',
+                inputAttributes: { min: 1, max: produto.quantidade, step: 1 },
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2e7d32'
+            });
+            
+            if (!qtd || qtd <= 0 || qtd > produto.quantidade) {
+                showToast("Quantidade inválida!", "error");
+                return;
+            }
+            
+            const { value: motivo } = await Swal.fire({
+                title: 'Motivo da Baixa',
+                input: 'select',
+                inputOptions: {
+                    'perda': 'Perda/Quebra',
+                    'vencimento': 'Vencimento',
+                    'devolucao': 'Devolução',
+                    'outro': 'Outro'
+                },
+                inputPlaceholder: 'Selecione o motivo',
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2e7d32'
+            });
+            
+            if (!motivo) return;
+            
+            const novaQuantidade = produto.quantidade - qtd;
+            await database.ref('produtos/' + id).update({ quantidade: novaQuantidade });
+            
+            await database.ref('entradas_saidas/' + Date.now()).set({
+                produtoId: id,
+                produtoNome: produto.nome,
+                tipo: 'SAÍDA',
+                quantidade: qtd,
+                motivo: motivo,
+                usuario: currentUser.nome,
+                data: new Date().toISOString()
+            });
+            
+            showToast(`Baixa de ${qtd} unidades registrada!`);
+            carregarEstoque();
+            carregarDashboard();
+        };
+        
+        window.deleteProduct = async (id) => {
+            const produto = produtosCache.find(p => p.id === id);
+            if (!produto) return;
+            
+            const result = await Swal.fire({
+                title: 'Tem certeza?',
+                text: `Deseja excluir permanentemente o produto "${produto.nome}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (result.isConfirmed) {
+                await database.ref('produtos/' + id).remove();
+                showToast("Produto excluído com sucesso!");
+                carregarEstoque();
+                carregarDashboard();
+            }
+        };
+        
+        // ==================== VENDAS ====================
+        function renderVendas() {
+            return `
+                <h4 style="color: #2e7d32;">
+                    <i class="fas fa-chart-line"></i> Relatório de Vendas
+                </h4>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="stat-value" id="vendasHojeTotal">0 Kz</div>
+                            <div class="stat-label">Vendas Hoje</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card" style="border-left-color: #ff9800;">
+                            <div class="stat-value" id="vendasSemanaTotal" style="color: #ff9800;">0 Kz</div>
+                            <div class="stat-label">Vendas Esta Semana</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card" style="border-left-color: #9c27b0;">
+                            <div class="stat-value" id="vendasMesTotal" style="color: #9c27b0;">0 Kz</div>
+                            <div class="stat-label">Vendas Este Mês</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <h5><i class="fas fa-filter"></i> Filtrar por Período</h5>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <input type="date" class="form-control-pharma" id="filtroDataInicio">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="date" class="form-control-pharma" id="filtroDataFim">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn-primary-pharma w-100" onclick="filtrarVendas()">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <h5><i class="fas fa-list"></i> Histórico de Vendas</h5>
+                    <div id="historicoVendasAdmin" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+            `;
+        }
+        
+        async function carregarVendas(dataInicio = null, dataFim = null) {
+            const snapshot = await database.ref('vendas').once('value');
+            const vendas = snapshot.val() || {};
+            const hoje = new Date();
+            const inicioSemana = new Date(hoje);
+            inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+            const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            
+            let totalHoje = 0, totalSemana = 0, totalMes = 0;
+            const hojeStr = hoje.toISOString().split('T')[0];
+            let vendasArray = [];
+            
+            for (let key in vendas) {
+                const v = vendas[key];
+                vendasArray.push(v);
+                if (v.data === hojeStr) totalHoje += v.total || 0;
+                if (v.data >= inicioSemana.toISOString().split('T')[0]) totalSemana += v.total || 0;
+                if (v.data >= inicioMes.toISOString().split('T')[0]) totalMes += v.total || 0;
+            }
+            
+            document.getElementById('vendasHojeTotal').innerHTML = formatKwanza(totalHoje);
+            document.getElementById('vendasSemanaTotal').innerHTML = formatKwanza(totalSemana);
+            document.getElementById('vendasMesTotal').innerHTML = formatKwanza(totalMes);
+            
+            let vendasFiltradas = vendasArray;
+            if (dataInicio && dataFim) {
+                vendasFiltradas = vendasArray.filter(v => v.data >= dataInicio && v.data <= dataFim);
+            }
+            vendasFiltradas.sort((a, b) => b.data.localeCompare(a.data));
+            
+            const container = document.getElementById('historicoVendasAdmin');
+            if (vendasFiltradas.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center py-4">Nenhuma venda encontrada</div>';
+            } else {
+                container.innerHTML = vendasFiltradas.map(v => `
+                    <div class="log-entry">
+                        <div class="d-flex justify-content-between flex-wrap">
+                            <div>
+                                <strong>${formatDate(v.data)}</strong> às ${v.hora}
+                            </div>
+                            <strong class="text-success">${formatKwanza(v.total)}</strong>
+                        </div>
+                        <div>
+                            <small>Vendedor: ${v.vendedor} | ${v.items.length} itens</small>
+                        </div>
+                        <div>
+                            <small class="text-muted">Receita: ${v.receita || 'N/A'}</small>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        window.filtrarVendas = () => {
+            const inicio = document.getElementById('filtroDataInicio').value;
+            const fim = document.getElementById('filtroDataFim').value;
+            carregarVendas(inicio, fim);
+        };
+        
+        // ==================== RELATÓRIOS ====================
+        function renderRelatorios() {
+            return `
+                <h4 style="color: #2e7d32;">
+                    <i class="fas fa-chart-pie"></i> Relatórios de Movimentação
+                </h4>
+                
+                <div class="glass-card">
+                    <h5>Entradas vs Saídas (Últimos 7 dias)</h5>
+                    <canvas id="movimentacaoChart" height="200"></canvas>
+                </div>
+                
+                <div class="glass-card">
+                    <h5>Lista de Movimentações Recentes</h5>
+                    <div id="movimentacoesList" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            `;
+        }
+        
+        let movimentacaoChart = null;
+        
+        async function carregarRelatorios() {
+            const snapshot = await database.ref('entradas_saidas').once('value');
+            const movimentacoes = snapshot.val() || {};
+            entradasSaidasCache = Object.entries(movimentacoes).map(([id, m]) => ({ id, ...m }));
+            
+            const entradasPorDia = {};
+            const saidasPorDia = {};
+            
+            for (let i = 6; i >= 0; i--) {
+                const data = new Date();
+                data.setDate(data.getDate() - i);
+                const dataStr = data.toISOString().split('T')[0];
+                entradasPorDia[dataStr] = 0;
+                saidasPorDia[dataStr] = 0;
+            }
+            
+            for (let m of entradasSaidasCache) {
+                const dataMov = m.data.split('T')[0];
+                if (entradasPorDia[dataMov] !== undefined) {
+                    if (m.tipo === 'ENTRADA') {
+                        entradasPorDia[dataMov] += m.quantidade;
+                    } else {
+                        saidasPorDia[dataMov] += m.quantidade;
+                    }
+                }
+            }
+            
+            const ctx = document.getElementById('movimentacaoChart')?.getContext('2d');
+            if (ctx) {
+                if (movimentacaoChart) movimentacaoChart.destroy();
+                movimentacaoChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(entradasPorDia).map(d => d.slice(5)),
+                        datasets: [
+                            {
+                                label: 'Entradas',
+                                data: Object.values(entradasPorDia),
+                                backgroundColor: '#4caf50',
+                                borderRadius: 8
+                            },
+                            {
+                                label: 'Saídas',
+                                data: Object.values(saidasPorDia),
+                                backgroundColor: '#f44336',
+                                borderRadius: 8
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
+                    }
+                });
+            }
+            
+            const container = document.getElementById('movimentacoesList');
+            const sorted = [...entradasSaidasCache].sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            if (sorted.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center py-4">Nenhuma movimentação registrada</div>';
+            } else {
+                container.innerHTML = sorted.slice(0, 50).map(m => `
+                    <div class="log-entry">
+                        <div class="d-flex justify-content-between">
+                            <strong style="color: ${m.tipo === 'ENTRADA' ? '#4caf50' : '#f44336'};">
+                                ${m.tipo}
+                            </strong>
+                            <small>${new Date(m.data).toLocaleString()}</small>
+                        </div>
+                        <div>${escapeHtml(m.produtoNome)} - ${m.quantidade} unidades</div>
+                        <div><small>Usuário: ${m.usuario}</small></div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // ==================== LOGS ====================
+        function renderLogs() {
+            return `
+                <h4 style="color: #2e7d32;">
+                    <i class="fas fa-history"></i> Logs do Sistema
+                </h4>
+                
+                <div class="glass-card">
+                    <input type="text" class="form-control-pharma mb-3" id="filtroLogs" placeholder="Filtrar por usuário ou ação...">
+                    <div id="logsList" style="max-height: 500px; overflow-y: auto;"></div>
+                </div>
+            `;
+        }
+        
+        async function carregarLogs() {
+            const snapshot = await database.ref('logs').once('value');
+            const logs = snapshot.val() || {};
+            logsCache = Object.entries(logs).map(([id, l]) => ({ id, ...l }));
+            logsCache.sort((a, b) => new Date(b.data) - new Date(a.data));
+            
+            const filtroLogs = document.getElementById('filtroLogs');
+            if (filtroLogs) {
+                filtroLogs.addEventListener('input', (e) => {
+                    const filtered = logsCache.filter(l =>
+                        (l.usuario || '').toLowerCase().includes(e.target.value.toLowerCase()) ||
+                        (l.acao || '').toLowerCase().includes(e.target.value.toLowerCase())
+                    );
+                    renderLogsList(filtered);
+                });
+            }
+            
+            renderLogsList(logsCache);
+        }
+        
+        function renderLogsList(logs) {
+            const container = document.getElementById('logsList');
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center py-4">Nenhum log encontrado</div>';
+            } else {
+                container.innerHTML = logs.slice(0, 100).map(log => `
+                    <div class="log-entry">
+                        <div class="d-flex justify-content-between">
+                            <strong>${escapeHtml(log.acao)}</strong>
+                            <small>${new Date(log.data).toLocaleString()}</small>
+                        </div>
+                        <div>Usuário: ${escapeHtml(log.usuario)}</div>
+                        <div class="text-muted small">${escapeHtml(log.detalhes)}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // ==================== FUNCIONÁRIOS ====================
+        function renderFuncionarios() {
+            return `
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                    <h4 style="color: #2e7d32; margin: 0;">
+                        <i class="fas fa-users"></i> Gestão de Funcionários
+                    </h4>
+                    <button class="btn-primary-pharma" onclick="showFuncionarioModal()" style="width: auto; padding: 8px 16px;">
+                        <i class="fas fa-user-plus"></i> Novo Funcionário
+                    </button>
+                </div>
+                
+                <div class="glass-card">
+                    <h5><i class="fas fa-list"></i> Funcionários do Sistema</h5>
+                    <div id="funcionariosList"></div>
+                </div>
+            `;
+        }
+        
+        async function carregarFuncionarios() {
+            const snapshot = await database.ref('usuarios').once('value');
+            const users = snapshot.val() || {};
+            funcionariosCache = Object.entries(users).map(([id, u]) => ({ id, ...u }));
+            
+            const container = document.getElementById('funcionariosList');
+            if (funcionariosCache.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center py-4">Nenhum funcionário cadastrado</div>';
+                return;
+            }
+            
+            let html = '';
+            for (let user of funcionariosCache) {
+                const isAdmin = user.tipo === 'admin';
+                
+                html += `
+                    <div class="funcionario-card ${isAdmin ? 'admin' : 'vendedor'}" onclick="showFuncionarioDetails('${user.id}')">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas ${isAdmin ? 'fa-crown' : 'fa-user-circle'}" style="font-size: 1.5rem; color: ${isAdmin ? '#ff9800' : '#2e7d32'};"></i>
+                                    <div>
+                                        <strong>${escapeHtml(user.nome)}</strong>
+                                        <br>
+                                        <small class="text-muted">@${escapeHtml(user.usuario)}</small>
+                                    </div>
+                                </div>
+                                <div class="mt-1">
+                                    <small><i class="fas fa-envelope"></i> ${escapeHtml(user.email)}</small>
+                                </div>
+                            </div>
+                            <div>
+                                ${isAdmin ? '<span class="badge bg-warning text-dark">🔓 Administrador</span>' : '<span class="badge bg-success">🛒 Vendedor</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        window.showFuncionarioModal = () => {
+            const modal = new bootstrap.Modal(document.getElementById('funcionarioModal'));
+            document.getElementById('funcionarioForm').reset();
+            modal.show();
+        };
+        
+        window.salvarFuncionario = async () => {
+            const nome = document.getElementById('funcNome').value;
+            const email = document.getElementById('funcEmail').value;
+            const usuario = document.getElementById('funcUsuario').value;
+            const senha = document.getElementById('funcSenha').value;
+            
+            if (!nome || !email || !usuario || !senha) {
+                showToast("Preencha todos os campos!", "error");
+                return;
+            }
+            
+            if (senha.length < 4) {
+                showToast("A senha deve ter no mínimo 4 caracteres!", "error");
+                return;
+            }
+            
+            const snapshot = await database.ref('usuarios').once('value');
+            const users = snapshot.val();
+            
+            if (users) {
+                for (let key in users) {
+                    if (users[key].usuario === usuario) {
+                        showToast("Nome de usuário já existe!", "error");
+                        return;
+                    }
+                    if (users[key].email === email) {
+                        showToast("E-mail já cadastrado!", "error");
+                        return;
+                    }
+                }
+            }
+            
+            const userId = Date.now().toString();
+            
+            await database.ref('usuarios/' + userId).set({
+                uid: userId,
+                nome: nome,
+                email: email,
+                usuario: usuario,
+                senha: senha,
+                tipo: 'vendedor',
+                permissao: 'vendedor',
+                dataCriacao: new Date().toISOString()
+            });
+            
+            document.getElementById('funcionarioForm').reset();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('funcionarioModal'));
+            modal.hide();
+            
+            showToast("Funcionário cadastrado com sucesso!");
+            carregarFuncionarios();
+            carregarDashboard();
+        };
+        
+        window.showFuncionarioDetails = async (userId) => {
+            const user = funcionariosCache.find(u => u.id === userId);
+            if (!user) return;
+            
+            const isAdmin = user.tipo === 'admin';
+            
+            const content = `
+                <div class="text-center mb-3">
+                    <i class="fas ${isAdmin ? 'fa-crown' : 'fa-user-circle'}" style="font-size: 4rem; color: ${isAdmin ? '#ff9800' : '#2e7d32'};"></i>
+                </div>
+                <p><strong>Nome:</strong> ${escapeHtml(user.nome)}</p>
+                <p><strong>E-mail:</strong> ${escapeHtml(user.email)}</p>
+                <p><strong>Usuário:</strong> ${escapeHtml(user.usuario)}</p>
+                <p><strong>Permissão:</strong> ${isAdmin ? 'Administrador Master' : 'Vendedor'}</p>
+                <p><strong>Data de Cadastro:</strong> ${new Date(user.dataCriacao).toLocaleString()}</p>
+                <hr>
+                <div class="d-flex gap-2 justify-content-end">
+                    ${!isAdmin ? `
+                        <button class="btn btn-warning" onclick="editarFuncionario('${user.id}')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger" onclick="excluirFuncionario('${user.id}')">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    ` : '<span class="text-muted">Usuário Master não pode ser editado ou excluído</span>'}
+                </div>
+            `;
+            
+            document.getElementById('funcionarioDetailContent').innerHTML = content;
+            const modal = new bootstrap.Modal(document.getElementById('funcionarioDetailModal'));
+            modal.show();
+        };
+        
+        window.editarFuncionario = async (userId) => {
+            const user = funcionariosCache.find(u => u.id === userId);
+            if (!user) return;
+            
+            const { value: formValues } = await Swal.fire({
+                title: 'Editar Funcionário',
+                html: `
+                    <input id="swal-nome" class="swal2-input" placeholder="Nome" value="${escapeHtml(user.nome)}">
+                    <input id="swal-email" class="swal2-input" placeholder="E-mail" value="${escapeHtml(user.email)}">
+                    <input id="swal-usuario" class="swal2-input" placeholder="Usuário" value="${escapeHtml(user.usuario)}">
+                    <input id="swal-senha" class="swal2-input" placeholder="Nova senha (deixe em branco para manter)" type="password">
+                `,
+                focusConfirm: false,
+                preConfirm: () => {
+                    return {
+                        nome: document.getElementById('swal-nome').value,
+                        email: document.getElementById('swal-email').value,
+                        usuario: document.getElementById('swal-usuario').value,
+                        senha: document.getElementById('swal-senha').value
+                    }
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Salvar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#2e7d32'
+            });
+            
+            if (formValues) {
+                const updates = {
+                    nome: formValues.nome,
+                    email: formValues.email,
+                    usuario: formValues.usuario
+                };
+                
+                if (formValues.senha && formValues.senha.length >= 4) {
+                    updates.senha = formValues.senha;
+                }
+                
+                await database.ref('usuarios/' + userId).update(updates);
+                
+                showToast("Funcionário atualizado com sucesso!");
+                carregarFuncionarios();
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('funcionarioDetailModal'));
+                if (modal) modal.hide();
+            }
+        };
+        
+        window.excluirFuncionario = async (userId) => {
+            const user = funcionariosCache.find(u => u.id === userId);
+            if (!user) return;
+            
+            const result = await Swal.fire({
+                title: 'Tem certeza?',
+                text: `Deseja excluir o funcionário "${user.nome}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (result.isConfirmed) {
+                await database.ref('usuarios/' + userId).remove();
+                showToast("Funcionário excluído com sucesso!");
+                carregarFuncionarios();
+                carregarDashboard();
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('funcionarioDetailModal'));
+                if (modal) modal.hide();
+            }
+        };
+        
+        // ==================== PERFIL ====================
+        function renderPerfil() {
+            return `
+                <div class="pharma-card" style="background: linear-gradient(135deg, #2196f3, #1976d2); color: white;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div>
+                            <h3 style="color: white; margin: 0;">
+                                <i class="fas fa-user-circle"></i> Meu Perfil
+                            </h3>
+                            <small style="opacity: 0.9;">Informações da sua conta</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card">
+                    <div class="text-center mb-4">
+                        <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #2e7d32, #1b5e20); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                            <i class="fas fa-user-md" style="font-size: 3rem; color: white;"></i>
+                        </div>
+                        <h4 class="mt-3" style="color: #2e7d32;">${currentUser.nome}</h4>
+                        <span class="badge bg-warning text-dark">🔓 Administrador Master</span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-perfil" style="background: #f5f5f5; padding: 12px; border-radius: 12px; margin-bottom: 10px;">
+                                <div class="info-label" style="font-size: 0.7rem; color: #666;">Nome Completo</div>
+                                <div class="info-valor" style="font-weight: 600;">${currentUser.nome}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-perfil" style="background: #f5f5f5; padding: 12px; border-radius: 12px; margin-bottom: 10px;">
+                                <div class="info-label" style="font-size: 0.7rem; color: #666;">Usuário</div>
+                                <div class="info-valor" style="font-weight: 600;">${currentUser.usuario || 'admin'}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="info-perfil" style="background: #f5f5f5; padding: 12px; border-radius: 12px;">
+                                <div class="info-label" style="font-size: 0.7rem; color: #666;">Permissão</div>
+                                <div class="info-valor" style="font-weight: 600;">Acesso Total - Administrador Master</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function carregarPerfil() {
+            // Already rendered statically
+        }
+        
+        // ==================== NAVEGAÇÃO ====================
+        window.changePage = (page) => {
+            currentPage = page;
+            render();
+        };
+        
+        // Initialize navigation
+        function init() {
+
+            document.getElementById('adminNomeHeader').innerText = currentUser.nome;
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.getAttribute('data-page');
+                    changePage(page);
+                });
+            });
+            
+            render();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

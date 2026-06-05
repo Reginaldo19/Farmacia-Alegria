@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Farmácia Alegria - Área do Cliente</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        font-family: 'Segoe UI', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+        padding-bottom: 80px;
+        min-height: 100vh;
+    }
+    
+    .pharma-header {
+        background: linear-gradient(135deg, #1a472a, #0d2818);
+        padding: 15px 20px;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(26, 71, 42, 0.2);
+    }
+    
+    .logo-icon {
+        background: rgba(255,255,255,0.2);
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+    }
+    
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 20px;
+        border-top: 2px solid #2e7d32;
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .nav-item {
+        text-align: center;
+        color: #999;
+        text-decoration: none;
+        transition: all 0.3s;
+        cursor: pointer;
+        flex: 1;
+        position: relative;
+    }
+    
+    .nav-item.active,
+    .nav-item:hover {
+        color: #2e7d32;
+    }
+    
+    .nav-item span {
+        display: block;
+        font-size: 11px;
+        margin-top: 4px;
+    }
+    
+    .nav-item i {
+        font-size: 22px;
+    }
+    
+    .cart-badge {
+        position: absolute;
+        top: -8px;
+        right: 20px;
+        background: #E74C3C;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 9px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .glass-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        border: 1px solid rgba(46, 125, 50, 0.2);
+    }
+    
+    .btn-primary-pharma {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-weight: 600;
+        color: #ffffff;
+        transition: all 0.3s;
+        width: 100%;
+    }
+    
+    .btn-primary-pharma:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+    }
+    
+    .btn-outline-pharma {
+        background: transparent;
+        border: 1px solid #2e7d32;
+        border-radius: 12px;
+        padding: 10px 16px;
+        font-weight: 500;
+        color: #2e7d32;
+        transition: all 0.3s;
+    }
+    
+    .btn-outline-pharma:hover {
+        background: #2e7d32;
+        color: white;
+    }
+    
+    .form-control-pharma {
+        background: #f8fbfd;
+        border: 1px solid #d0e0e8;
+        color: #333;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: 0.95rem;
+        width: 100%;
+    }
+    
+    .form-control-pharma:focus {
+        border-color: #2e7d32;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+        outline: none;
+        background: #fff;
+    }
+    
+    .form-label {
+        color: #555;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .produtos-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+    
+    .product-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 12px;
+        transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid rgba(46, 125, 50, 0.15);
+        cursor: pointer;
+        text-align: center;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(46, 125, 50, 0.2);
+        border-color: #2e7d32;
+    }
+    
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        background: #eef5e9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+    }
+    
+    .product-price {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #2e7d32;
+        margin-top: 6px;
+    }
+    
+    .product-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #1a2c3e;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .receita-card {
+        background: linear-gradient(135deg, #f0f7ec, #e8f2e5);
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #2e7d32;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .receita-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .cart-item {
+        background: #f8fbfd;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-left: 3px solid #2e7d32;
+    }
+    
+    .cart-total {
+        background: linear-gradient(135deg, #1a472a, #0d2818);
+        border-radius: 16px;
+        padding: 15px;
+        color: white;
+        text-align: center;
+    }
+    
+    .cart-total .total-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    
+    .badge-pharma {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+    }
+    
+    .scroll-area {
+        max-height: 450px;
+        overflow-y: auto;
+    }
+    
+    .scroll-area::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .scroll-area::-webkit-scrollbar-track {
+        background: #e8f5e9;
+        border-radius: 10px;
+    }
+    
+    .scroll-area::-webkit-scrollbar-thumb {
+        background: #2e7d32;
+        border-radius: 10px;
+    }
+    
+    .modal-farma .modal-content {
+        border-radius: 24px;
+        border: none;
+    }
+    
+    .modal-farma .modal-header {
+        background: linear-gradient(135deg, #1a472a, #0d2818);
+        color: white;
+        border-radius: 24px 24px 0 0;
+    }
+    
+    .modal-farma .btn-close-white {
+        filter: brightness(0) invert(1);
+    }
+    
+    .perfil-avatar {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+    }
+    
+    .perfil-avatar i {
+        font-size: 3rem;
+        color: white;
+    }
+    
+    .comunicado-item {
+        background: #f8fbfd;
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 10px;
+        border-left: 4px solid #2e7d32;
+    }
+    
+    .comunicado-urgente {
+        border-left-color: #E74C3C;
+        background: #fef5f5;
+    }
+    
+    .auth-container {
+        max-width: 480px;
+        margin: 0 auto;
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .auth-header .auth-logo {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+    }
+    
+    .auth-header .auth-logo i {
+        font-size: 2.5rem;
+        color: white;
+    }
+    
+    .auth-header h3 {
+        color: #2e7d32;
+        font-weight: 600;
+    }
+    
+    .auth-tabs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+        background: #e8f5e9;
+        border-radius: 16px;
+        padding: 5px;
+    }
+    
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #888;
+        border-radius: 12px;
+        transition: all 0.3s;
+    }
+    
+    .auth-tab.active {
+        background: #ffffff;
+        color: #2e7d32;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .auth-form {
+        display: none;
+    }
+    
+    .auth-form.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .promo-banner {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border-radius: 20px;
+        padding: 20px;
+        color: white;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .categoria-item {
+        text-align: center;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-radius: 16px;
+    }
+    
+    .categoria-item:hover {
+        background: #e8f5e9;
+    }
+    
+    .categoria-item i {
+        font-size: 1.8rem;
+        color: #2e7d32;
+        margin-bottom: 8px;
+    }
+    
+    .categoria-item span {
+        font-size: 0.7rem;
+        display: block;
+        color: #666;
+    }
+    
+    .info-perfil {
+        background: #f8fbfd;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .info-label {
+        font-size: 0.7rem;
+        color: #888;
+        text-transform: uppercase;
+    }
+    
+    .info-valor {
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .busca-receita {
+        margin-bottom: 20px;
+    }
+    .busca-receita .input-group-custom {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .busca-receita .input-group-custom input {
+        flex: 1;
+    }
+    .busca-receita .input-group-custom button {
+        white-space: nowrap;
+        width: auto;
+        padding: 0 16px;
+    }
+    
+    /* Input group custom */
+    .input-group-text {
+        border-color: #d0e0e8;
+    }
+    
+    /* Pagamento ativo */
+    .btn-primary-pharma.w-100 {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+    }
+</style></head>
+<body>
+
+    <div class="pharma-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="logo-icon">
+                    <i class="fas fa-capsules fa-lg"></i>
+                </div>
+                <div>
+                    <h5 style="margin: 0; font-weight: 700;">Farmácia Alegria Pharma</h5>
+                    <small style="opacity: 0.9;" id="headerSubtitle">Área do Cliente</small>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <div class="badge-pharma" id="clienteInfo" style="background: rgba(255,255,255,0.2); color: white; cursor: pointer;" onclick="if(isLoggedIn) changePage('perfil')">
+                    <i class="fas fa-user"></i> <span id="clienteNomeHeader">Minha Conta</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 20px; padding-bottom: 80px;" id="app"></div>
+
+    <div class="bottom-nav" id="bottomNav" style="display: none;">
+        <div class="nav-item" data-page="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </div>
+        <div class="nav-item" data-page="produtos">
+            <i class="fas fa-pills"></i>
+            <span>Produtos</span>
+        </div>
+        <div class="nav-item" data-page="carrinho">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrinho</span>
+            <span class="cart-badge" id="cartBadge">0</span>
+        </div>
+        <div class="nav-item" data-page="pedidos">
+            <i class="fas fa-truck"></i>
+            <span>Pedidos</span>
+        </div>
+        <div class="nav-item" data-page="receitas">
+            <i class="fas fa-prescription"></i>
+            <span>Receitas</span>
+        </div>
+        <div class="nav-item" data-page="perfil">
+            <i class="fas fa-user-circle"></i>
+            <span>Perfil</span>
+        </div>
+    </div>
+
+    <!-- Modal de Produto -->
+    <div class="modal fade modal-farma" id="productDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title"><i class="fas fa-capsules"></i> Detalhes do Produto</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="productDetailContent"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button class="btn-primary-pharma" id="addToCartFromModal" onclick="addCurrentProductToCart()" style="width: auto;">Adicionar ao Carrinho</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Receita (Detalhe) -->
+    <div class="modal fade modal-farma" id="receitaDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title"><i class="fas fa-prescription"></i> Detalhes da Receita</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="receitaDetailContent"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button class="btn-primary-pharma" onclick="imprimirReceita()" style="width: auto;"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Checkout -->
+    <div class="modal fade modal-farma" id="checkoutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title"><i class="fas fa-credit-card"></i> Finalizar Compra</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <div class="cart-total">
+                            <small>Total da Compra</small>
+                            <div class="total-value" id="checkoutTotal">0 Kz</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Forma de Pagamento *</label>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <button class="btn-outline-pharma w-100" onclick="selectPayment('dinheiro')" id="paymentDinheiro">
+                                    <i class="fas fa-money-bill"></i> Dinheiro
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn-outline-pharma w-100" onclick="selectPayment('pix')" id="paymentPix">
+                                    <i class="fas fa-qrcode"></i> Pix
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn-outline-pharma w-100" onclick="selectPayment('cartao')" id="paymentCartao">
+                                    <i class="fas fa-credit-card"></i> Cartão
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="trocoSection" style="display: none;">
+                        <label class="form-label">Valor Recebido</label>
+                        <input type="number" class="form-control-pharma" id="valorRecebido" placeholder="Valor recebido em dinheiro">
+                        <div id="trocoInfo" class="mt-2 small"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Endereço de Entrega *</label>
+                        <textarea class="form-control-pharma" id="endereco" rows="2" placeholder="Rua, número, bairro, cidade..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telefone para Contato *</label>
+                        <input type="tel" class="form-control-pharma" id="telefone" placeholder="(XX) XXXXX-XXXX" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn-primary-pharma" onclick="confirmarCompra()">Confirmar Compra</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pedido Detalhe -->
+    <div class="modal fade modal-farma" id="pedidoDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title"><i class="fas fa-box"></i> Detalhes do Pedido</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="pedidoDetailContent"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvDc46HzQviKzniF05xH6dMuOtKtsbQYQ",
+            authDomain: "sandfarma-b2170.firebaseapp.com",
+            databaseURL: "https://sandfarma-b2170-default-rtdb.firebaseio.com",
+            projectId: "sandfarma-b2170",
+            storageBucket: "sandfarma-b2170.firebasestorage.app",
+            messagingSenderId: "27746642641",
+            appId: "1:27746642641:web:a0fc437da19b07178e33f0"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let currentPage = 'dashboard';
+        let isLoggedIn = false;
+        let currentClient = null;
+        let produtosCache = [];
+        let carrinho = [];
+        let selectedProduct = null;
+        let selectedPayment = '';
+        let currentReceita = null;
+        
+        function formatKwanza(valor) {
+            if (valor === undefined || valor === null) valor = 0;
+            return new Intl.NumberFormat('pt-AO', {
+                style: 'currency',
+                currency: 'AOA',
+                minimumFractionDigits: 0
+            }).format(valor);
+        }
+        
+        function formatDateBr(data) {
+            if (!data) return '';
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+        
+        function escapeHtml(texto) {
+            if (!texto) return '';
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+        
+        function showToast(msg, type = 'success') {
+            Swal.fire({
+                text: msg,
+                icon: type === 'error' ? 'error' : 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                background: type === 'error' ? '#E74C3C' : '#4A90B8',
+                color: 'white'
+            });
+        }
+        
+        // ==================== LOGIN / CADASTRO ====================
+        function renderAuth() {
+            return `
+                <div class="auth-container">
+                    <div class="auth-header">
+                        <div class="auth-logo"><i class="fas fa-capsules"></i></div>
+                        <h3>Farmácia Alegria Pharma</h3>
+                        <p>Bem-vindo! Faça login para continuar</p>
+                    </div>
+                    <div class="glass-card">
+                        <div class="auth-tabs">
+                            <div class="auth-tab active" data-tab="login">Entrar</div>
+                            <div class="auth-tab" data-tab="cadastro">Criar Conta</div>
+                        </div>
+                        <div class="auth-form active" id="loginForm">
+                            <form onsubmit="event.preventDefault(); fazerLogin()">
+                                <div class="mb-3">
+                                    <label class="form-label">E-mail ou Usuário</label>
+                                    <input type="text" class="form-control-pharma" id="loginEmail" placeholder="Digite seu e-mail" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Senha</label>
+                                    <input type="password" class="form-control-pharma" id="loginSenha" placeholder="Digite sua senha" required>
+                                </div>
+                                <button type="submit" class="btn-primary-pharma">Entrar</button>
+                            </form>
+                        </div>
+                        <div class="auth-form" id="cadastroForm">
+                            <form onsubmit="event.preventDefault(); fazerCadastro()">
+                                <div class="mb-3">
+                                    <label class="form-label">Nome Completo</label>
+                                    <input type="text" class="form-control-pharma" id="cadastroNome" placeholder="Seu nome completo" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">E-mail</label>
+                                    <input type="email" class="form-control-pharma" id="cadastroEmail" placeholder="seu@email.com" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Usuário</label>
+                                    <input type="text" class="form-control-pharma" id="cadastroUsuario" placeholder="Nome de usuário" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Senha</label>
+                                    <input type="password" class="form-control-pharma" id="cadastroSenha" placeholder="Mínimo 4 caracteres" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control-pharma" id="cadastroTelefone" placeholder="(XX) XXXXX-XXXX">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Endereço</label>
+                                    <textarea class="form-control-pharma" id="cadastroEndereco" rows="2" placeholder="Rua, número, bairro, cidade"></textarea>
+                                </div>
+                                <button type="submit" class="btn-primary-pharma">Criar Conta</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function fazerLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const senha = document.getElementById('loginSenha').value;
+            if (!email || !senha) { showToast("Preencha todos os campos!", "error"); return; }
+            database.ref('clientes').once('value', (snapshot) => {
+                const clientes = snapshot.val() || {};
+                let encontrado = false;
+                for (let key in clientes) {
+                    const cliente = clientes[key];
+                    if ((cliente.email === email || cliente.usuario === email) && cliente.senha === senha) {
+                        encontrado = true;
+                        currentClient = { id: key, ...cliente };
+                        isLoggedIn = true;
+                        localStorage.setItem('sandgest_cliente', JSON.stringify(currentClient));
+                        document.getElementById('clienteNomeHeader').innerHTML = `<i class="fas fa-user"></i> ${currentClient.nome.split(' ')[0]}`;
+                        document.getElementById('headerSubtitle').innerText = `Olá, ${currentClient.nome.split(' ')[0]}!`;
+                        showToast("Login realizado com sucesso!", "success");
+                        changePage('dashboard');
+                        break;
+                    }
+                }
+                if (!encontrado) showToast("E-mail ou senha incorretos!", "error");
+            });
+        }
+        
+        function fazerCadastro() {
+            const nome = document.getElementById('cadastroNome').value;
+            const email = document.getElementById('cadastroEmail').value;
+            const usuario = document.getElementById('cadastroUsuario').value;
+            const senha = document.getElementById('cadastroSenha').value;
+            const telefone = document.getElementById('cadastroTelefone').value;
+            const endereco = document.getElementById('cadastroEndereco').value;
+            if (!nome || !email || !usuario || !senha) { showToast("Preencha todos os campos obrigatórios!", "error"); return; }
+            if (senha.length < 4) { showToast("A senha deve ter no mínimo 4 caracteres!", "error"); return; }
+            database.ref('clientes').once('value', (snapshot) => {
+                const clientes = snapshot.val() || {};
+                for (let key in clientes) {
+                    if (clientes[key].email === email) { showToast("E-mail já cadastrado!", "error"); return; }
+                    if (clientes[key].usuario === usuario) { showToast("Usuário já existe!", "error"); return; }
+                }
+                const newId = Date.now().toString();
+                const novoCliente = { nome, email, usuario, senha, telefone: telefone || '', endereco: endereco || '', dataCadastro: new Date().toISOString(), status: 'ativo' };
+                database.ref('clientes/' + newId).set(novoCliente);
+                currentClient = { id: newId, ...novoCliente };
+                isLoggedIn = true;
+                localStorage.setItem('sandges_cliente', JSON.stringify(currentClient));
+                document.getElementById('clienteNomeHeader').innerHTML = `<i class="fas fa-user"></i> ${currentClient.nome.split(' ')[0]}`;
+                document.getElementById('headerSubtitle').innerText = `Olá, ${currentClient.nome.split(' ')[0]}!`;
+                showToast("Cadastro realizado com sucesso!", "success");
+                changePage('dashboard');
+            });
+        }
+        
+        function initAuthTabs() {
+            const tabs = document.querySelectorAll('.auth-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.getAttribute('data-tab');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+                    document.getElementById(`${tabName}Form`).classList.add('active');
+                });
+            });
+        }
+        
+        // ==================== RENDER PRINCIPAL ====================
+        function render() {
+            const app = document.getElementById('app');
+            if (!isLoggedIn) {
+                app.innerHTML = renderAuth();
+                initAuthTabs();
+                document.getElementById('bottomNav').style.display = 'none';
+                return;
+            }
+            document.getElementById('bottomNav').style.display = 'flex';
+            if (currentPage === 'dashboard') { app.innerHTML = renderDashboard(); carregarDashboard(); }
+            else if (currentPage === 'produtos') { app.innerHTML = renderProdutos(); carregarProdutos(); }
+            else if (currentPage === 'carrinho') { app.innerHTML = renderCarrinho(); renderizarCarrinho(); }
+            else if (currentPage === 'pedidos') { app.innerHTML = renderPedidos(); carregarPedidos(); }
+            else if (currentPage === 'receitas') { app.innerHTML = renderReceitas(); carregarReceitas(); initBuscaReceita(); }
+            else if (currentPage === 'perfil') { app.innerHTML = renderPerfil(); }
+            updateActiveNav();
+            updateCartBadge();
+        }
+        
+        function updateActiveNav() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-page') === currentPage) item.classList.add('active');
+            });
+        }
+        
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            const totalItems = carrinho.reduce((s, i) => s + i.quantidade, 0);
+            if (totalItems > 0 && badge) { badge.style.display = 'flex'; badge.innerText = totalItems > 99 ? '99+' : totalItems; }
+            else if (badge) badge.style.display = 'none';
+        }
+        
+        // ==================== DASHBOARD ====================
+        function renderDashboard() {
+            return `
+                <div class="promo-banner">
+                    <h4><i class="fas fa-gift"></i> Bem-vindo, ${escapeHtml(currentClient?.nome?.split(' ')[0] || 'Cliente')}!</h4>
+                    <p>Frete grátis para compras acima de 10.000 Kz</p>
+                    <small>Atendimento: Seg-Sex 8h às 20h</small>
+                </div>
+                <div class="glass-card">
+                    <h5><i class="fas fa-tags"></i> Navegue por Categorias</h5>
+                    <div class="row g-2 mt-2">
+                        <div class="col-3"><div class="categoria-item" onclick="filtrarPorCategoria('antibiotico')"><i class="fas fa-capsules"></i><span>Antibióticos</span></div></div>
+                        <div class="col-3"><div class="categoria-item" onclick="filtrarPorCategoria('analgesico')"><i class="fas fa-head-side-medical"></i><span>Analgésicos</span></div></div>
+                        <div class="col-3"><div class="categoria-item" onclick="filtrarPorCategoria('vitaminas')"><i class="fas fa-apple-alt"></i><span>Vitaminas</span></div></div>
+                        <div class="col-3"><div class="categoria-item" onclick="filtrarPorCategoria('dermato')"><i class="fas fa-hand-holding-heart"></i><span>Dermatológicos</span></div></div>
+                    </div>
+                </div>
+                <div class="glass-card">
+                    <h5><i class="fas fa-fire" style="color: #E74C3C;"></i> Produtos em Destaque</h5>
+                    <div id="destaquesList" class="produtos-grid" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+                <div class="glass-card">
+                    <h5><i class="fas fa-prescription"></i> Últimas Receitas</h5>
+                    <div id="ultimasReceitas" class="scroll-area" style="max-height: 300px;"></div>
+                </div>
+            `;
+        }
+        
+        async function carregarDashboard() {
+            const snapshotProdutos = await database.ref('produtos').once('value');
+            const produtos = snapshotProdutos.val() || {};
+            const destaques = Object.entries(produtos).slice(0, 6);
+            const destaquesContainer = document.getElementById('destaquesList');
+            if (destaquesContainer) {
+                if (destaques.length === 0) destaquesContainer.innerHTML = '<div class="text-muted text-center py-3">Nenhum produto disponível</div>';
+                else {
+                    destaquesContainer.innerHTML = destaques.map(([id, p]) => `
+                        <div class="product-card" onclick="abrirProdutoDetalhe('${id}')">
+                            <div class="product-image"><i class="fas fa-capsules fa-2x" style="color: #4A90B8;"></i></div>
+                            <div class="product-name">${escapeHtml(p.nome)}</div>
+                            <div class="product-price">${formatKwanza(p.preco)}</div>
+                            <small class="text-muted">por unidade</small>
+                        </div>
+                    `).join('');
+                }
+            }
+            const snapshotReceitas = await database.ref('receitas_cliente').once('value');
+            const receitas = snapshotReceitas.val() || {};
+            const minhasReceitas = Object.entries(receitas).map(([id, r]) => ({ id, ...r })).filter(r => r.clienteId === currentClient.id).sort((a, b) => new Date(b.data) - new Date(a.data)).slice(0, 3);
+            const receitasContainer = document.getElementById('ultimasReceitas');
+            if (receitasContainer) {
+                if (minhasReceitas.length === 0) receitasContainer.innerHTML = '<div class="text-muted text-center py-3">Nenhuma receita encontrada</div>';
+                else {
+                    receitasContainer.innerHTML = minhasReceitas.map(r => `
+                        <div class="receita-card" onclick="verReceitaCliente('${r.id}')">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><strong><i class="fas fa-prescription"></i> ${escapeHtml(r.idReceita)}</strong><br><small>${r.data}</small></div>
+                                <div><span class="badge-pharma">${(r.medicamentos && r.medicamentos.length) || 0} medicamentos</span></div>
+                            </div>
+                            <div class="mt-1 small text-muted">Paciente: ${escapeHtml(r.pacienteNome)}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+        
+        window.filtrarPorCategoria = (categoria) => {
+            changePage('produtos');
+            setTimeout(() => {
+                const searchInput = document.getElementById('searchProduto');
+                if (searchInput) { searchInput.value = categoria; buscarProdutosPorCategoria(categoria); }
+            }, 100);
+        };
+        
+        function buscarProdutosPorCategoria(categoria) {
+            database.ref('produtos').once('value', (snapshot) => {
+                const produtos = snapshot.val() || {};
+                const resultados = Object.entries(produtos).filter(([id, p]) => p.tipo?.toLowerCase().includes(categoria.toLowerCase()) || p.nome?.toLowerCase().includes(categoria.toLowerCase())).map(([id, p]) => ({ id, ...p, quantidadeEstoque: p.quantidade || 0 }));
+                renderProdutosList(resultados);
+            });
+        }
+        
+        // ==================== PRODUTOS (GRID 2x2) ====================
+        function renderProdutos() {
+            return `
+                <div class="glass-card">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border" style="border-radius: 12px 0 0 12px;"><i class="fas fa-search" style="color: #4A90B8;"></i></span>
+                        <input type="text" class="form-control-pharma" id="searchProduto" placeholder="Buscar medicamentos por nome..." style="border-radius: 0 12px 12px 0;">
+                    </div>
+                </div>
+                <div id="produtosList" class="produtos-grid" style="max-height: 550px; overflow-y: auto;"></div>
+            `;
+        }
+        
+        async function carregarProdutos() {
+            const snapshot = await database.ref('produtos').once('value');
+            const produtos = snapshot.val() || {};
+            produtosCache = Object.entries(produtos).map(([id, p]) => ({ id, ...p, quantidadeEstoque: p.quantidade || 0 }));
+            produtosCache = produtosCache.filter(p => p.quantidadeEstoque > 0);
+            const searchInput = document.getElementById('searchProduto');
+            if (searchInput) searchInput.addEventListener('input', (e) => filtrarProdutos(e.target.value));
+            filtrarProdutos('');
+        }
+        
+        function filtrarProdutos(search) {
+            const searchLower = search.toLowerCase();
+            const filtered = produtosCache.filter(p => p.nome?.toLowerCase().includes(searchLower) || p.principioAtivo?.toLowerCase().includes(searchLower) || p.fabricante?.toLowerCase().includes(searchLower));
+            renderProdutosList(filtered);
+        }
+        
+        function renderProdutosList(produtos) {
+            const container = document.getElementById('produtosList');
+            if (!container) return;
+            if (!produtos || produtos.length === 0) { container.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-search fa-3x mb-2 opacity-25"></i><br>Nenhum produto encontrado</div>'; return; }
+            container.innerHTML = produtos.map(p => `
+                <div class="product-card" onclick="abrirProdutoDetalhe('${p.id}')">
+                    <div class="product-image"><i class="fas fa-capsules fa-2x" style="color: #4A90B8;"></i></div>
+                    <div class="product-name">${escapeHtml(p.nome)}</div>
+                    <div class="mt-1"><small class="text-muted">${escapeHtml(p.fabricante || p.origem || '')}</small></div>
+                    <div class="product-price">${formatKwanza(p.preco)}</div>
+                    <small class="text-muted">por unidade</small>
+                </div>
+            `).join('');
+        }
+        
+        window.abrirProdutoDetalhe = (id) => {
+            const produto = produtosCache.find(p => p.id === id);
+            if (!produto) return;
+            selectedProduct = produto;
+            const content = `
+                <div class="text-center mb-3"><div style="width: 100px; height: 100px; background: #eef5f9; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto;"><i class="fas fa-capsules fa-3x" style="color: #4A90B8;"></i></div></div>
+                <p><strong>Nome:</strong> ${escapeHtml(produto.nome)}</p>
+                <p><strong>Fabricante:</strong> ${escapeHtml(produto.fabricante || produto.origem || 'Não informado')}</p>
+                <p><strong>Princípio Ativo:</strong> ${escapeHtml(produto.principioAtivo || 'Não informado')}</p>
+                <p><strong>Apresentação:</strong> ${produto.apresentacao || produto.tipo || 'Comprimido'}</p>
+                <p><strong>Preço:</strong> ${formatKwanza(produto.preco)}</p>
+                <p><strong>Validade:</strong> ${produto.dataValidade ? new Date(produto.dataValidade).toLocaleDateString() : 'N/I'}</p>
+                ${produto.descricao ? `<p><strong>Descrição:</strong> ${escapeHtml(produto.descricao)}</p>` : ''}
+                <hr>
+                <div class="row g-2"><div class="col-6"><label class="form-label">Quantidade</label><input type="number" class="form-control-pharma" id="prodQuantidade" value="1" min="1" max="${produto.quantidadeEstoque}"></div></div>
+            `;
+            document.getElementById('productDetailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('productDetailModal')).show();
+        };
+        
+        window.addCurrentProductToCart = () => {
+            if (!selectedProduct) return;
+            const quantidade = parseInt(document.getElementById('prodQuantidade')?.value || 1);
+            if (quantidade < 1 || quantidade > selectedProduct.quantidadeEstoque) { showToast("Quantidade inválida ou excede o estoque!", "error"); return; }
+            const existente = carrinho.find(item => item.id === selectedProduct.id);
+            if (existente) existente.quantidade += quantidade;
+            else carrinho.push({ id: selectedProduct.id, nome: selectedProduct.nome, preco: selectedProduct.preco, quantidade });
+            bootstrap.Modal.getInstance(document.getElementById('productDetailModal')).hide();
+            updateCartBadge();
+            showToast(`${quantidade}x ${selectedProduct.nome} adicionado ao carrinho!`, "success");
+        };
+        
+        // ==================== CARRINHO ====================
+        function renderCarrinho() {
+            return `
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5><i class="fas fa-shopping-cart"></i> Meu Carrinho (${carrinho.length} itens)</h5>
+                        <button class="btn-outline-pharma" onclick="limparCarrinho()" style="padding: 5px 12px;"><i class="fas fa-trash-alt"></i> Limpar</button>
+                    </div>
+                    <div id="carrinhoItemsList" class="scroll-area" style="max-height: 400px;"></div>
+                    <hr>
+                    <div class="cart-total mt-3"><small>Total do Pedido</small><div class="total-value" id="cartTotal">0 Kz</div><small>em até 3x sem juros no cartão</small></div>
+                    <button class="btn-primary-pharma mt-3" onclick="abrirCheckout()"><i class="fas fa-check-circle"></i> Finalizar Compra</button>
+                </div>
+            `;
+        }
+        
+        function renderizarCarrinho() {
+            const container = document.getElementById('carrinhoItemsList');
+            const totalSpan = document.getElementById('cartTotal');
+            if (!container) return;
+            if (carrinho.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-shopping-cart fa-3x mb-2 opacity-25"></i><br>Seu carrinho está vazio</div>';
+                if (totalSpan) totalSpan.innerHTML = formatKwanza(0);
+                return;
+            }
+            let total = 0;
+            container.innerHTML = carrinho.map((item, index) => {
+                const subtotal = item.preco * item.quantidade;
+                total += subtotal;
+                return `
+                    <div class="cart-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1"><strong>${escapeHtml(item.nome)}</strong><br><small class="text-muted">${formatKwanza(item.preco)} cada</small></div>
+                            <div class="text-end">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="alterarQuantidadeCarrinho(${index}, -1)">-</button>
+                                    <span class="fw-bold" style="min-width: 30px;">${item.quantidade}</span>
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="alterarQuantidadeCarrinho(${index}, 1)">+</button>
+                                    <button class="btn btn-sm btn-outline-danger rounded-pill" onclick="removerDoCarrinho(${index})"><i class="fas fa-trash"></i></button>
+                                </div>
+                                <div class="fw-bold" style="color: #4A90B8;">${formatKwanza(subtotal)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            if (totalSpan) totalSpan.innerHTML = formatKwanza(total);
+            updateCartBadge();
+        }
+        
+        window.alterarQuantidadeCarrinho = (index, delta) => {
+            const item = carrinho[index];
+            if (!item) return;
+            const novaQuantidade = item.quantidade + delta;
+            if (novaQuantidade < 1) carrinho.splice(index, 1);
+            else item.quantidade = novaQuantidade;
+            renderizarCarrinho();
+        };
+        
+        window.removerDoCarrinho = (index) => { carrinho.splice(index, 1); renderizarCarrinho(); };
+        window.limparCarrinho = () => { if (carrinho.length === 0) return; Swal.fire({ title: 'Limpar carrinho?', text: 'Todos os itens serão removidos', icon: 'question', showCancelButton: true, confirmButtonColor: '#E74C3C', confirmButtonText: 'Sim, limpar', cancelButtonText: 'Cancelar' }).then(result => { if (result.isConfirmed) { carrinho = []; renderizarCarrinho(); showToast("Carrinho limpo!", "success"); } }); };
+        
+        function selectPayment(tipo) {
+            selectedPayment = tipo;
+            document.getElementById('paymentDinheiro').className = 'btn-outline-pharma w-100';
+            document.getElementById('paymentPix').className = 'btn-outline-pharma w-100';
+            document.getElementById('paymentCartao').className = 'btn-outline-pharma w-100';
+            document.getElementById(`payment${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).className = 'btn-primary-pharma w-100';
+            const trocoSection = document.getElementById('trocoSection');
+            if (tipo === 'dinheiro') { trocoSection.style.display = 'block'; document.getElementById('valorRecebido').addEventListener('input', calcularTroco); }
+            else trocoSection.style.display = 'none';
+        }
+        
+        function calcularTroco() {
+            const total = carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+            const recebido = parseFloat(document.getElementById('valorRecebido')?.value) || 0;
+            const troco = recebido - total;
+            const trocoInfo = document.getElementById('trocoInfo');
+            if (troco >= 0) trocoInfo.innerHTML = `<span class="text-success">Troco: ${formatKwanza(troco)}</span>`;
+            else trocoInfo.innerHTML = `<span class="text-danger">Valor insuficiente: faltam ${formatKwanza(Math.abs(troco))}</span>`;
+        }
+        
+        window.abrirCheckout = () => {
+            if (carrinho.length === 0) { showToast("Seu carrinho está vazio!", "error"); return; }
+            document.getElementById('checkoutTotal').innerHTML = formatKwanza(carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0));
+            document.getElementById('valorRecebido').value = '';
+            selectedPayment = '';
+            document.getElementById('paymentDinheiro').className = 'btn-outline-pharma w-100';
+            document.getElementById('paymentPix').className = 'btn-outline-pharma w-100';
+            document.getElementById('paymentCartao').className = 'btn-outline-pharma w-100';
+            document.getElementById('trocoSection').style.display = 'none';
+            document.getElementById('endereco').value = currentClient?.endereco || '';
+            document.getElementById('telefone').value = currentClient?.telefone || '';
+            new bootstrap.Modal(document.getElementById('checkoutModal')).show();
+        };
+        
+        window.confirmarCompra = async () => {
+            if (carrinho.length === 0) { showToast("Carrinho vazio!", "error"); return; }
+            if (!selectedPayment) { showToast("Selecione a forma de pagamento!", "error"); return; }
+            const endereco = document.getElementById('endereco').value;
+            const telefone = document.getElementById('telefone').value;
+            if (!endereco || !telefone) { showToast("Preencha o endereço e telefone!", "error"); return; }
+            if (selectedPayment === 'dinheiro') {
+                const total = carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+                const recebido = parseFloat(document.getElementById('valorRecebido')?.value) || 0;
+                if (recebido < total) { showToast("Valor insuficiente!", "error"); return; }
+            }
+            const pedidoId = Date.now().toString();
+            const total = carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+            await database.ref('pedidos_cliente/' + pedidoId).set({
+                id: pedidoId, clienteId: currentClient.id, clienteNome: currentClient.nome, data: new Date().toISOString().split('T')[0], hora: new Date().toLocaleTimeString(),
+                items: carrinho.map(item => ({ id: item.id, nome: item.nome, quantidade: item.quantidade, preco: item.preco, subtotal: item.preco * item.quantidade })),
+                total, formaPagamento: selectedPayment, endereco, telefone, status: 'confirmado', rastreio: `SAND-${pedidoId.slice(-8)}`
+            });
+            bootstrap.Modal.getInstance(document.getElementById('checkoutModal')).hide();
+            carrinho = []; renderizarCarrinho();
+            showToast(`Pedido #${pedidoId.slice(-8)} confirmado!`, "success");
+            if (currentPage === 'carrinho') render();
+        };
+        
+        // ==================== PEDIDOS ====================
+        function renderPedidos() {
+            return `<div class="glass-card"><h5><i class="fas fa-truck"></i> Meus Pedidos</h5><div id="pedidosList" class="scroll-area" style="max-height: 500px;"></div></div>`;
+        }
+        
+        async function carregarPedidos() {
+            const snapshot = await database.ref('pedidos_cliente').once('value');
+            const pedidos = snapshot.val() || {};
+            const meusPedidos = Object.entries(pedidos).map(([id, p]) => ({ id, ...p })).filter(p => p.clienteId === currentClient.id).sort((a, b) => new Date(b.data) - new Date(a.data));
+            const container = document.getElementById('pedidosList');
+            if (!container) return;
+            if (meusPedidos.length === 0) { container.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-box-open fa-3x mb-2 opacity-25"></i><br>Você ainda não fez nenhum pedido</div>'; return; }
+            container.innerHTML = meusPedidos.map(p => `
+                <div class="receita-card" onclick="verPedidoDetalhe('${p.id}')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div><strong><i class="fas fa-box"></i> Pedido: ${escapeHtml(p.rastreio || p.id.slice(-8))}</strong><br><small>${p.data}</small></div>
+                        <div class="text-end"><div class="fw-bold" style="color: #4A90B8;">${formatKwanza(p.total)}</div><span class="badge-pharma">${p.status === 'confirmado' ? '✅ Confirmado' : p.status === 'recebido' ? '📦 Recebido' : p.status === 'caminho' ? '🚚 A Caminho' : p.status === 'entregue' ? '🏠 Entregue' : p.status}</span></div>
+                    </div>
+                    <div class="mt-2 small text-muted"><i class="fas fa-truck"></i> ${p.items.length} itens</div>
+                </div>
+            `).join('');
+        }
+        
+        window.verPedidoDetalhe = async (id) => {
+            const snapshot = await database.ref('pedidos_cliente/' + id).once('value');
+            const p = snapshot.val();
+            if (!p) return;
+            const itemsHtml = p.items.map(item => `<div class="d-flex justify-content-between align-items-center p-2" style="background: #f8fbfd; border-radius: 10px; margin-bottom: 8px;"><div><strong>${escapeHtml(item.nome)}</strong><br><small>${item.quantidade}x ${formatKwanza(item.preco)}</small></div><div class="fw-bold">${formatKwanza(item.subtotal)}</div></div>`).join('');
+            const content = `<div><div class="text-center mb-3"><i class="fas fa-box fa-3x" style="color: #4A90B8;"></i></div><p><strong>Código do Pedido:</strong> ${escapeHtml(p.rastreio || p.id.slice(-8))}</p><p><strong>Data:</strong> ${p.data} às ${p.hora}</p><p><strong>Status:</strong> <span class="badge-pharma">${p.status === 'confirmado' ? '✅ Confirmado' : p.status === 'recebido' ? '📦 Recebido' : p.status === 'caminho' ? '🚚 A Caminho' : p.status === 'entregue' ? '🏠 Entregue' : p.status}</span></p><hr><p><strong>Itens do Pedido:</strong></p>${itemsHtml}<hr><p><strong>Total:</strong> ${formatKwanza(p.total)}</p><p><strong>Pagamento:</strong> ${p.formaPagamento === 'dinheiro' ? 'Dinheiro' : (p.formaPagamento === 'pix' ? 'Pix' : 'Cartão')}</p><p><strong>Endereço de Entrega:</strong> ${escapeHtml(p.endereco)}</p><p><strong>Telefone:</strong> ${escapeHtml(p.telefone)}</p></div>`;
+            document.getElementById('pedidoDetailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('pedidoDetailModal')).show();
+        };
+        
+        // ==================== RECEITAS (COM BUSCA GLOBAL POR ID) ====================
+        function renderReceitas() {
+            return `
+                <div class="glass-card">
+                    <h5><i class="fas fa-prescription"></i> Minhas Receitas Médicas</h5>
+                    <div class="busca-receita">
+                        <div class="input-group-custom">
+                            <input type="text" id="buscaReceitaId" class="form-control-pharma" placeholder="Digite o ID da receita (ex: RX-202501-1234)">
+                            <button class="btn-primary-pharma" onclick="buscarReceitaPorIdGlobal()" style="width: auto; padding: 0 20px;"><i class="fas fa-search"></i> Buscar</button>
+                        </div>
+                        <button class="btn-outline-pharma w-100" onclick="limparBuscaReceita()" style="padding: 8px;"><i class="fas fa-list"></i> Mostrar minhas receitas</button>
+                    </div>
+                    <div id="receitasLista" class="scroll-area" style="max-height: 450px;"></div>
+                </div>
+            `;
+        }
+        
+        // Carrega as receitas do próprio cliente (do nó receitas_cliente)
+        async function carregarReceitas(buscaId = null) {
+            const snapshot = await database.ref('receitas_cliente').once('value');
+            const receitas = snapshot.val() || {};
+            let minhasReceitas = Object.entries(receitas).map(([id, r]) => ({ id, ...r })).filter(r => r.clienteId === currentClient.id);
+            if (buscaId) {
+                minhasReceitas = minhasReceitas.filter(r => r.idReceita && r.idReceita.toLowerCase().includes(buscaId.toLowerCase()));
+            }
+            minhasReceitas.sort((a, b) => new Date(b.data) - new Date(a.data));
+            const container = document.getElementById('receitasLista');
+            if (!container) return;
+            if (minhasReceitas.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-prescription fa-3x mb-2 opacity-25"></i><br>Nenhuma receita encontrada</div>';
+                return;
+            }
+            container.innerHTML = minhasReceitas.map(r => `
+                <div class="receita-card" onclick="verReceitaCliente('${r.id}')">
+                    <div class="d-flex justify-content-between">
+                        <div><strong><i class="fas fa-prescription"></i> ${escapeHtml(r.idReceita)}</strong><br><small>${r.data}</small></div>
+                        <div class="text-end"><span class="badge-pharma">${(r.medicamentos && r.medicamentos.length) || 0} medicamentos</span></div>
+                    </div>
+                    <div class="mt-2"><small><strong>Paciente:</strong> ${escapeHtml(r.pacienteNome)}</small><br><small><strong>Diagnóstico:</strong> ${escapeHtml(r.diagnostico || 'Não informado')}</small></div>
+                </div>
+            `).join('');
+        }
+        
+        // Função para buscar receita pelo ID no nó global "receitas" (gerado pelo funcionário)
+        async function buscarReceitaPorIdGlobal() {
+            const receitaId = document.getElementById('buscaReceitaId').value.trim();
+            if (!receitaId) {
+                showToast("Digite o ID da receita", "error");
+                return;
+            }
+            // Buscar no nó "receitas" (onde as receitas médicas são geradas pelo funcionário)
+            const snapshot = await database.ref('receitas/' + receitaId).once('value');
+            const receita = snapshot.val();
+            if (!receita) {
+                showToast("Receita não encontrada. Verifique o ID.", "error");
+                return;
+            }
+            // Exibir a receita encontrada
+            exibirReceitaGlobal(receita);
+        }
+        
+        // Exibe receita do nó global "receitas"
+        function exibirReceitaGlobal(receita) {
+            // Formatar medicamentos (estrutura: receita.medicamentos)
+            const medicamentosArray = receita.medicamentos || [];
+            const medicamentosHtml = medicamentosArray.map(m => `
+                <div class="d-flex justify-content-between align-items-center p-2" style="background: #f8fbfd; border-radius: 10px; margin-bottom: 8px;">
+                    <div><strong>${escapeHtml(m.nome)}</strong></div>
+                    <div><span class="badge-pharma"><i class="fas fa-clock"></i> ${escapeHtml(m.horario)}</span></div>
+                    <div class="text-muted small">${escapeHtml(m.observacao || '')}</div>
+                </div>
+            `).join('');
+            
+            const content = `
+                <div class="text-center mb-4">
+                    <h5 style="color: #4A90B8;">Farmácia Alegria</h5>
+                    <p><strong>RECEITA MÉDICA</strong></p>
+                    <hr>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <small class="text-muted">ID da Receita</small>
+                        <div><strong>${escapeHtml(receita.id)}</strong></div>
+                    </div>
+                    <div class="col-6 text-end">
+                        <small class="text-muted">Data</small>
+                        <div><strong>${formatDateBr(receita.data)}</strong></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Paciente</small>
+                    <div><strong>${escapeHtml(receita.paciente?.nome)}</strong></div>
+                    <div><small>Idade: ${receita.paciente?.idade || 'N/I'} anos | Diagnóstico: ${escapeHtml(receita.paciente?.doenca || 'N/I')}</small></div>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Medicamentos Prescritos</small>
+                    ${medicamentosHtml}
+                </div>
+                ${receita.observacoes ? `<div class="mb-3"><small class="text-muted">Observações</small><div class="p-2" style="background: #f8fbfd; border-radius: 12px;">${escapeHtml(receita.observacoes)}</div></div>` : ''}
+                ${receita.medico ? `<div class="mb-3"><small class="text-muted">Médico Prescritor</small><div><strong>${escapeHtml(receita.medico)}</strong> ${receita.crm ? `(CRM: ${escapeHtml(receita.crm)})` : ''}</div></div>` : ''}
+                <hr>
+                <div class="text-center">
+                    <small class="text-muted">Emitido por: ${escapeHtml(receita.vendedor)}</small>
+                </div>
+            `;
+            document.getElementById('receitaDetailContent').innerHTML = content;
+            currentReceita = receita;
+            new bootstrap.Modal(document.getElementById('receitaDetailModal')).show();
+        }
+        
+        // Visualiza receita própria (do nó receitas_cliente)
+        window.verReceitaCliente = async (id) => {
+            const snapshot = await database.ref('receitas_cliente/' + id).once('value');
+            const r = snapshot.val();
+            if (!r) return;
+            const medicamentosArray = r.medicamentos || [];
+            const medicamentosHtml = medicamentosArray.map(m => `
+                <div class="d-flex justify-content-between align-items-center p-2" style="background: #f8fbfd; border-radius: 10px; margin-bottom: 8px;">
+                    <div><strong>${escapeHtml(m.nome)}</strong></div>
+                    <div><span class="badge-pharma"><i class="fas fa-clock"></i> ${escapeHtml(m.horario)}</span></div>
+                    <div class="text-muted small">${escapeHtml(m.observacao || '')}</div>
+                </div>
+            `).join('');
+            const content = `
+                <div class="text-center mb-4"><h5 style="color: #4A90B8;">Farmácia Alegria PHARMA</h5><p><strong>RECEITA MÉDICA</strong></p><hr></div>
+                <div class="row mb-3"><div class="col-6"><small class="text-muted">ID da Receita</small><div><strong>${escapeHtml(r.idReceita)}</strong></div></div><div class="col-6 text-end"><small class="text-muted">Data</small><div><strong>${r.data}</strong></div></div></div>
+                <div class="mb-3"><small class="text-muted">Paciente</small><div><strong>${escapeHtml(r.pacienteNome)}</strong></div><div><small>Idade: ${r.pacienteIdade} anos</small></div></div>
+                <div class="mb-3"><small class="text-muted">Diagnóstico</small><div><strong>${escapeHtml(r.diagnostico)}</strong></div></div>
+                <div class="mb-3"><small class="text-muted">Medicamentos Prescritos</small>${medicamentosHtml}</div>
+                ${r.observacoes ? `<div class="mb-3"><small class="text-muted">Observações</small><div class="p-2" style="background: #f8fbfd; border-radius: 12px;">${escapeHtml(r.observacoes)}</div></div>` : ''}
+                <hr><div class="text-center"><small class="text-muted">Emitido por: ${escapeHtml(r.emitidoPor || 'Farmácia Alegria')}</small></div>
+            `;
+            document.getElementById('receitaDetailContent').innerHTML = content;
+            currentReceita = r;
+            new bootstrap.Modal(document.getElementById('receitaDetailModal')).show();
+        };
+        
+        function limparBuscaReceita() {
+            document.getElementById('buscaReceitaId').value = '';
+            carregarReceitas();
+        }
+        
+        function initBuscaReceita() {
+            const input = document.getElementById('buscaReceitaId');
+            if (input && !input.hasListener) {
+                input.addEventListener('keypress', (e) => { if (e.key === 'Enter') buscarReceitaPorIdGlobal(); });
+                input.hasListener = true;
+            }
+        }
+        
+        window.imprimirReceita = () => {
+            const content = document.getElementById('receitaDetailContent').innerHTML;
+            const win = window.open('', '_blank');
+            win.document.write(`<html><head><title>Receita Médica - ${currentReceita?.idReceita || currentReceita?.id || 'Farmácia Alegria'}</title><style>body{font-family:monospace;padding:40px;max-width:800px;margin:0 auto;}.text-center{text-align:center;}hr{margin:20px 0;}</style></head><body>${content}</body></html>`);
+            win.print();
+        };
+        
+        // ==================== PERFIL ====================
+        function renderPerfil() {
+            return `
+                <div class="glass-card">
+                    <div class="text-center mb-4"><div class="perfil-avatar"><i class="fas fa-user-circle"></i></div><h4 id="perfilNomeDisplay">${escapeHtml(currentClient?.nome)}</h4><span class="badge-pharma">Cliente desde ${new Date(currentClient?.dataCadastro).getFullYear() || '2024'}</span></div>
+                    <div class="row">
+                        <div class="col-md-6"><div class="info-perfil"><div class="info-label">Nome Completo</div><div class="info-valor" id="perfilNomeValor">${escapeHtml(currentClient?.nome)}</div></div></div>
+                        <div class="col-md-6"><div class="info-perfil"><div class="info-label">E-mail</div><div class="info-valor" id="perfilEmailValor">${escapeHtml(currentClient?.email)}</div></div></div>
+                        <div class="col-md-6"><div class="info-perfil"><div class="info-label">Usuário</div><div class="info-valor" id="perfilUsuarioValor">${escapeHtml(currentClient?.usuario)}</div></div></div>
+                        <div class="col-md-6"><div class="info-perfil"><div class="info-label">Telefone</div><div class="info-valor" id="perfilTelefoneValor">${escapeHtml(currentClient?.telefone || 'Não informado')}</div></div></div>
+                        <div class="col-12"><div class="info-perfil"><div class="info-label">Endereço</div><div class="info-valor" id="perfilEnderecoValor">${escapeHtml(currentClient?.endereco || 'Não informado')}</div></div></div>
+                    </div>
+                    <hr>
+                    <button class="btn-outline-pharma mb-2 w-100" onclick="abrirEditarPerfil()"><i class="fas fa-edit"></i> Editar Perfil</button>
+                    <button class="btn-outline-pharma w-100" onclick="logout()" style="border-color: #E74C3C; color: #E74C3C;"><i class="fas fa-sign-out-alt"></i> Sair da Conta</button>
+                </div>
+            `;
+        }
+        
+        function abrirEditarPerfil() {
+            Swal.fire({
+                title: 'Editar Perfil',
+                html: `<input id="editNome" class="swal2-input" placeholder="Nome" value="${escapeHtml(currentClient?.nome)}"><input id="editEmail" class="swal2-input" placeholder="E-mail" value="${escapeHtml(currentClient?.email)}"><input id="editUsuario" class="swal2-input" placeholder="Usuário" value="${escapeHtml(currentClient?.usuario)}"><input id="editTelefone" class="swal2-input" placeholder="Telefone" value="${escapeHtml(currentClient?.telefone || '')}"><textarea id="editEndereco" class="swal2-textarea" placeholder="Endereço" rows="2">${escapeHtml(currentClient?.endereco || '')}</textarea><input id="editSenha" class="swal2-input" placeholder="Nova senha (opcional)" type="password">`,
+                focusConfirm: false,
+                preConfirm: () => ({ nome: document.getElementById('editNome').value, email: document.getElementById('editEmail').value, usuario: document.getElementById('editUsuario').value, telefone: document.getElementById('editTelefone').value, endereco: document.getElementById('editEndereco').value, senha: document.getElementById('editSenha').value }),
+                showCancelButton: true, confirmButtonText: 'Salvar', cancelButtonText: 'Cancelar', confirmButtonColor: '#4A90B8'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const updates = { nome: result.value.nome, email: result.value.email, usuario: result.value.usuario, telefone: result.value.telefone, endereco: result.value.endereco };
+                    if (result.value.senha && result.value.senha.length >= 4) updates.senha = result.value.senha;
+                    await database.ref('clientes/' + currentClient.id).update(updates);
+                    currentClient = { ...currentClient, ...updates };
+                    localStorage.setItem('sandgest_cliente', JSON.stringify(currentClient));
+                    document.getElementById('clienteNomeHeader').innerHTML = `<i class="fas fa-user"></i> ${currentClient.nome.split(' ')[0]}`;
+                    showToast("Perfil atualizado com sucesso!", "success");
+                    if (currentPage === 'perfil') render();
+                }
+            });
+        }
+        
+        function logout() {
+            Swal.fire({ title: 'Sair da Conta', text: 'Deseja realmente sair?', icon: 'question', showCancelButton: true, confirmButtonColor: '#E74C3C', confirmButtonText: 'Sim, sair', cancelButtonText: 'Cancelar' }).then(result => {
+                if (result.isConfirmed) { isLoggedIn = false; currentClient = null; carrinho = []; localStorage.removeItem('sandgest_cliente'); document.getElementById('clienteNomeHeader').innerHTML = '<i class="fas fa-user"></i> Minha Conta'; document.getElementById('headerSubtitle').innerText = 'Área do Cliente'; changePage('dashboard'); }
+            });
+        }
+        
+        // ==================== NAVEGAÇÃO ====================
+        window.changePage = (page) => { currentPage = page; render(); };
+        
+        // ==================== INICIALIZAÇÃO ====================
+        function init() {
+            const clienteStr = localStorage.getItem('sandgest_cliente');
+            if (clienteStr) {
+                currentClient = JSON.parse(clienteStr);
+                isLoggedIn = true;
+                document.getElementById('clienteNomeHeader').innerHTML = `<i class="fas fa-user"></i> ${currentClient.nome.split(' ')[0]}`;
+                document.getElementById('headerSubtitle').innerText = `Olá, ${currentClient.nome.split(' ')[0]}!`;
+            }
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.getAttribute('data-page');
+                    if (isLoggedIn) changePage(page);
+                    else showToast("Faça login para acessar esta página!", "error");
+                });
+            });
+            render();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

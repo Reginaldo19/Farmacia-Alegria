@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SandGest - Ponto de Venda (Funcionário)</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        background: #f0f2f8;
+        font-family: 'Segoe UI', 'Poppins', sans-serif;
+        padding-bottom: 75px;
+    }
+    
+    /* Header - Verde Farmacêutico */
+    .pharma-header {
+        background: linear-gradient(135deg, #1a472a, #0d2818);
+        padding: 12px 20px;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    
+    .logo-icon {
+        background: rgba(255,255,255,0.2);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+    }
+    
+    .perfil-btn {
+        background: rgba(255,255,255,0.2);
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .perfil-btn:hover {
+        background: rgba(255,255,255,0.3);
+    }
+    
+    /* Menu inferior */
+    .bottom-menu {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        display: flex;
+        justify-content: space-around;
+        padding: 8px 0;
+        border-top: 1px solid #e8ecef;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+        z-index: 1000;
+    }
+    
+    .menu-item {
+        text-align: center;
+        color: #8a9aa8;
+        cursor: pointer;
+        transition: all 0.2s;
+        padding: 8px 0;
+        flex: 1;
+        border-radius: 12px;
+        position: relative;
+    }
+    
+    .menu-item.active {
+        color: #2e7d32;
+        background: #e8f5e9;
+    }
+    
+    .menu-item i {
+        font-size: 22px;
+    }
+    
+    .menu-item span {
+        display: block;
+        font-size: 10px;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+    
+    .carrinho-badge, .pedido-badge {
+        position: absolute;
+        top: -5px;
+        right: 25%;
+        background: #f44336;
+        color: white;
+        border-radius: 50%;
+        min-width: 18px;
+        height: 18px;
+        font-size: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+    }
+    
+    /* Cards */
+    .card-moderno {
+        background: white;
+        border-radius: 24px;
+        padding: 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border: 1px solid #eef2f5;
+    }
+    
+    /* Grid de produtos 2x2 */
+    .produtos-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+    
+    .produto-card-grid {
+        background: white;
+        border-radius: 20px;
+        padding: 12px;
+        border: 1px solid #eef2f5;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .produto-card-grid::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: #2e7d32;
+        border-radius: 20px 0 0 20px;
+    }
+    
+    .produto-card-grid:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
+    }
+    
+    .produto-imagem {
+        width: 80px;
+        height: 80px;
+        border-radius: 16px;
+        object-fit: cover;
+        background: #f5f7fa;
+        margin: 0 auto 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .produto-nome {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1a2c3e;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .produto-preco {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #2e7d32;
+    }
+    
+    .produto-estoque {
+        font-size: 0.65rem;
+        background: #e8f5e9;
+        padding: 2px 8px;
+        border-radius: 20px;
+        color: #2e7d32;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .produto-estoque.critico {
+        background: #ffebee;
+        color: #c62828;
+    }
+    
+    .btn-add-carrinho {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border: none;
+        border-radius: 14px;
+        padding: 5px 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.7rem;
+        transition: all 0.2s;
+        margin-top: 8px;
+        width: 100%;
+    }
+    
+    .btn-add-carrinho:hover {
+        transform: scale(1.02);
+        background: linear-gradient(135deg, #1b5e20, #0d2818);
+    }
+    
+    .carrinho-item-card {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 10px;
+        border-left: 4px solid #2e7d32;
+    }
+    
+    .total-card {
+        background: linear-gradient(135deg, #1a472a, #0d2818);
+        border-radius: 20px;
+        padding: 18px;
+        color: white;
+        text-align: center;
+    }
+    
+    .btn-verde {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border: none;
+        border-radius: 16px;
+        padding: 12px;
+        color: white;
+        font-weight: 700;
+        width: 100%;
+    }
+    
+    .btn-verde-outline {
+        background: transparent;
+        border: 2px solid #2e7d32;
+        border-radius: 16px;
+        padding: 12px;
+        color: #2e7d32;
+        font-weight: 700;
+        width: 100%;
+    }
+    
+    .btn-vermelho {
+        background: linear-gradient(135deg, #d32f2f, #b71c1c);
+        border: none;
+        border-radius: 16px;
+        padding: 12px;
+        color: white;
+        font-weight: 700;
+    }
+    
+    .search-wrapper {
+        background: white;
+        border-radius: 20px;
+        padding: 5px;
+        border: 1px solid #eef2f5;
+    }
+    
+    .search-input {
+        border: none;
+        background: transparent;
+        padding: 12px 16px;
+        width: 100%;
+        font-size: 0.95rem;
+    }
+    
+    .search-input:focus {
+        outline: none;
+    }
+    
+    .scroll-produtos {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+    
+    .tab-panel {
+        display: none;
+    }
+    
+    .tab-panel.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .container-farma {
+        max-width: 550px;
+        margin: 0 auto;
+        padding: 16px;
+    }
+    
+    /* Cards de pedido */
+    .pedido-card {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 12px;
+        border-left: 4px solid #2e7d32;
+        transition: all 0.2s;
+    }
+    
+    .pedido-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .pedido-status {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .status-confirmado { background: #e8f5e9; color: #2e7d32; }
+    .status-recebido { background: #e8f5e9; color: #2e7d32; }
+    .status-caminho { background: #fff3e0; color: #ef6c00; }
+    .status-entregue { background: #e8f5e9; color: #2e7d32; }
+    .status-rejeitado { background: #ffebee; color: #c62828; }
+    
+    .btn-pedido {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        margin: 2px;
+    }
+    
+    /* Modal receita */
+    .form-control-pharma {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #eef2f5;
+        border-radius: 16px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    
+    .form-control-pharma:focus {
+        outline: none;
+        border-color: #2e7d32;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.2);
+    }
+    
+    .modal-content-pharma {
+        border-radius: 24px;
+        overflow: hidden;
+    }
+    
+    .receita-header {
+        background: linear-gradient(135deg, #1a472a, #0d2818);
+        padding: 20px;
+        color: white;
+        text-align: center;
+    }
+    
+    .divider {
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #2e7d32, transparent);
+        margin: 20px 0;
+    }
+    
+    .medicamento-row {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 12px;
+        margin-bottom: 12px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .medicamento-row input {
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    /* Dashboard pedidos pendentes */
+    .pendente-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eef2f5;
+        cursor: pointer;
+    }
+    
+    .pendente-item:last-child { border-bottom: none; }
+    .pendente-item:hover { background: #f8fafc; border-radius: 12px; }
+    
+    .receita-card {
+        background: #fff8e1;
+        border-radius: 16px;
+        padding: 16px;
+        border-left: 4px solid #ff9800;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .receita-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .btn-editar, .btn-excluir {
+        border: none;
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-size: 0.7rem;
+        margin-left: 5px;
+    }
+    .btn-editar { background: #ff9800; color: white; }
+    .btn-excluir { background: #d32f2f; color: white; }
+    
+    /* Botão flutuante */
+    .float-msg {
+        position: fixed;
+        bottom: 85px;
+        right: 20px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 6px 20px rgba(46, 125, 50, 0.4);
+        z-index: 99;
+    }
+    
+    .comunicado-item {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 10px;
+        border-left: 4px solid #2e7d32;
+    }
+    .comunicado-urgente {
+        border-left-color: #d32f2f;
+        background: #fff5f5;
+    }
+    
+    /* Classe de botão azul renomeada para verde */
+    .btn-azul {
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        border: none;
+        border-radius: 16px;
+        padding: 12px;
+        color: white;
+        font-weight: 700;
+        width: 100%;
+    }
+    
+    .btn-azul-outline {
+        background: transparent;
+        border: 2px solid #2e7d32;
+        border-radius: 16px;
+        padding: 12px;
+        color: #2e7d32;
+        font-weight: 700;
+        width: 100%;
+    }
+    
+    /* Numpad */
+    .numpad-btn {
+        transition: all 0.2s;
+    }
+    .numpad-btn:hover {
+        background: #2e7d32 !important;
+        color: white !important;
+    }
+    
+    /* Classes de informação */
+    .info-label {
+        font-size: 0.7rem;
+        color: #666;
+        text-transform: uppercase;
+    }
+    .info-valor {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1a472a;
+    }
+    
+    /* Botão outline */
+    .btn-outline-pharma {
+        background: transparent;
+        border: 1px solid #2e7d32;
+        border-radius: 12px;
+        padding: 4px 10px;
+        color: #2e7d32;
+        font-size: 0.7rem;
+    }
+</style></head>
+<body>
+
+    <!-- Header -->
+    <div class="pharma-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="logo-icon">
+                    <i class="fas fa-capsules fa-lg"></i>
+                </div>
+                <div>
+                    <h5 style="margin: 0; font-weight: 700;">SandGest Pharma</h5>
+                    <small style="opacity: 0.9;">Painel do Funcionário</small>
+                </div>
+            </div>
+            <div class="perfil-btn" onclick="abrirPerfil()">
+                <i class="fas fa-user-circle"></i>
+                <span id="vendedorNome">Carregando...</span>
+                <i class="fas fa-chevron-down" style="font-size: 10px;"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-farma">
+        
+        <!-- Aba 1 - Vender -->
+        <div id="tab-vender" class="tab-panel active">
+            <!-- Card de Pedidos Pendentes (Dashboard) -->
+            <div class="card-moderno" id="dashboardPedidosCard" style="display: none;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fas fa-truck" style="color: #ff9800;"></i>
+                    <h6 style="margin: 0; font-weight: 700;">Pedidos Recentes de Clientes</h6>
+                </div>
+                <div id="pedidosPendentesList" class="scroll-produtos" style="max-height: 250px;"></div>
+                <button class="btn-azul-outline btn-sm mt-2" onclick="changePage('pedidos-clientes')" style="padding: 8px;">
+                    <i class="fas fa-arrow-right"></i> Gerenciar todos os pedidos
+                </button>
+            </div>
+            
+            <div class="card-moderno">
+                <div class="search-wrapper d-flex align-items-center">
+                    <i class="fas fa-search text-muted ms-3"></i>
+                    <input type="text" id="buscaProduto" class="search-input" placeholder="Buscar por nome...">
+                    <button class="btn-azul-outline" style="width: auto; padding: 8px 16px;" onclick="buscarProdutos()">Buscar</button>
+                </div>
+            </div>
+            
+            <div id="resultadoBusca" style="margin-bottom: 16px;"></div>
+            
+            <div class="card-moderno">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="fas fa-fire-flame" style="color: #ff9800;"></i>
+                    <h6 style="margin: 0; font-weight: 700;">Produtos em Destaque</h6>
+                </div>
+                <div id="produtosDestaque" class="produtos-grid"></div>
+            </div>
+        </div>
+        
+        <!-- Aba 2 - Carrinho -->
+        <div id="tab-carrinho" class="tab-panel">
+            <div class="card-moderno">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 style="margin: 0; font-weight: 700;">
+                        <i class="fas fa-shopping-cart" style="color: #89CFF0;"></i> Meu Carrinho
+                    </h6>
+                    <button class="btn-azul-outline" style="padding: 6px 14px; width: auto;" onclick="limparCarrinho()">
+                        <i class="fas fa-trash-alt"></i> Limpar
+                    </button>
+                </div>
+                <div id="carrinhoItems" class="scroll-produtos" style="max-height: 340px;"></div>
+                <hr>
+                <div class="total-card mb-3">
+                    <small>TOTAL DA VENDA</small>
+                    <div class="total-valor" id="totalGeral" style="font-size: 2rem; font-weight: 800;">0 Kz</div>
+                </div>
+                <button class="btn-azul w-100 mb-3" onclick="abrirModalReceita()">
+                    <i class="fas fa-prescription"></i> Gerar Receita Médica
+                </button>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary">Nº da Receita (se houver)</label>
+                    <div class="search-wrapper">
+                        <i class="fas fa-receipt text-muted ms-3"></i>
+                        <input type="text" id="numeroReceita" class="search-input" placeholder="Número da receita">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary">Forma de Pagamento</label>
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <button class="btn-azul-outline w-100 py-2" onclick="selecionarPagamento('dinheiro')" id="btnDinheiro">
+                                <i class="fas fa-money-bill"></i> Dinheiro
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn-azul-outline w-100 py-2" onclick="selecionarPagamento('debito')" id="btnDebito">
+                                <i class="fas fa-credit-card"></i> Débito
+                            </button>
+                        </div>
+                        <div class="col-4">
+                            <button class="btn-azul-outline w-100 py-2" onclick="selecionarPagamento('credito')" id="btnCredito">
+                                <i class="fas fa-credit-card"></i> Crédito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button class="btn-azul w-100" onclick="finalizarVenda()">
+                            <i class="fas fa-check-circle"></i> Finalizar
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn-vermelho w-100" onclick="cancelarVenda()">
+                            <i class="fas fa-times-circle"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Aba 3 - Receitas -->
+        <div id="tab-receitas" class="tab-panel">
+            <div class="card-moderno">
+                <h6 style="font-weight: 700; margin-bottom: 15px;">
+                    <i class="fas fa-prescription" style="color: #89CFF0;"></i> Receitas Geradas
+                </h6>
+                <div class="busca-receita">
+                    <div class="search-wrapper">
+                        <i class="fas fa-search text-muted ms-3"></i>
+                        <input type="text" id="buscaReceitaId" class="search-input" placeholder="Buscar receita por ID...">
+                        <button class="btn-azul-outline" style="width: auto; padding: 8px 16px;" onclick="buscarReceitaPorId()">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                    <button class="btn-azul-outline w-100 mt-2" style="padding: 8px;" onclick="limparBuscaReceita()">
+                        <i class="fas fa-list"></i> Mostrar todas minhas receitas
+                    </button>
+                </div>
+                <div id="receitasList" class="scroll-produtos" style="max-height: 450px;"></div>
+            </div>
+        </div>
+        
+        <!-- Aba 4 - Mensagens -->
+        <div id="tab-mensagens" class="tab-panel">
+            <div class="card-moderno">
+                <h6 style="font-weight: 700;">
+                    <i class="fas fa-envelope" style="color: #89CFF0;"></i> Mensagens do ADM
+                </h6>
+                <div id="mensagensList" class="scroll-produtos" style="max-height: 350px;"></div>
+            </div>
+            <div class="card-moderno">
+                <h6 style="font-weight: 700;">
+                    <i class="fas fa-paper-plane"></i> Enviar Mensagem
+                </h6>
+                <div class="search-wrapper mb-2">
+                    <i class="fas fa-tag text-muted ms-3"></i>
+                    <input type="text" id="msgAssunto" class="search-input" placeholder="Assunto">
+                </div>
+                <textarea id="msgConteudo" class="search-input" rows="3" placeholder="Sua mensagem..." style="border: 1px solid #eef2f5; border-radius: 16px; margin-bottom: 10px;"></textarea>
+                <select id="msgPrioridade" class="search-input" style="border: 1px solid #eef2f5; border-radius: 16px; margin-bottom: 10px;">
+                    <option value="normal">📌 Normal</option>
+                    <option value="urgente">⚠️ Urgente</option>
+                </select>
+                <button class="btn-azul w-100" onclick="enviarMensagem()">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </div>
+        </div>
+        
+        <!-- Aba 5 - Minhas Vendas -->
+        <div id="tab-minhas-vendas" class="tab-panel">
+            <div class="card-moderno">
+                <h6 style="font-weight: 700;">
+                    <i class="fas fa-chart-line" style="color: #89CFF0;"></i> Histórico de Vendas
+                </h6>
+                <div id="historicoVendas" class="scroll-produtos" style="max-height: 500px;"></div>
+            </div>
+        </div>
+        
+        <!-- Aba 6 - Pedidos Clientes -->
+        <div id="tab-pedidos-clientes" class="tab-panel">
+            <div class="card-moderno">
+                <h6 style="font-weight: 700;">
+                    <i class="fas fa-truck" style="color: #89CFF0;"></i> Pedidos dos Clientes
+                </h6>
+                <div class="mb-2 d-flex gap-2 flex-wrap">
+                    <button class="btn-azul-outline btn-sm flex-grow-1" onclick="filtrarPedidos('todos')">Todos</button>
+                    <button class="btn-azul-outline btn-sm flex-grow-1" onclick="filtrarPedidos('confirmado')">Confirmados</button>
+                    <button class="btn-azul-outline btn-sm flex-grow-1" onclick="filtrarPedidos('recebido')">Recebidos</button>
+                    <button class="btn-azul-outline btn-sm flex-grow-1" onclick="filtrarPedidos('caminho')">A Caminho</button>
+                    <button class="btn-azul-outline btn-sm flex-grow-1" onclick="filtrarPedidos('entregue')">Entregues</button>
+                    <button class="btn-azul-outline btn-sm flex-grow-1" onclick="filtrarPedidos('rejeitado')">Rejeitados</button>
+                </div>
+                <div id="pedidosClientesList" class="scroll-produtos" style="max-height: 500px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Inferior -->
+    <div class="bottom-menu">
+        <div class="menu-item active" data-tab="vender">
+            <i class="fas fa-cash-register"></i>
+            <span>Vender</span>
+        </div>
+        <div class="menu-item" data-tab="carrinho" id="menuCarrinho">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Carrinho</span>
+            <span id="carrinhoBadge" class="carrinho-badge" style="display: none;">0</span>
+        </div>
+        <div class="menu-item" data-tab="receitas">
+            <i class="fas fa-prescription"></i>
+            <span>Receitas</span>
+        </div>
+        <div class="menu-item" data-tab="pedidos-clientes" id="menuPedidos">
+            <i class="fas fa-truck"></i>
+            <span>Pedidos</span>
+            <span id="pedidoBadge" class="pedido-badge" style="display: none;">0</span>
+        </div>
+        <div class="menu-item" data-tab="minhas-vendas">
+            <i class="fas fa-chart-simple"></i>
+            <span>Vendas</span>
+        </div>
+        <div class="menu-item" data-tab="mensagens">
+            <i class="fas fa-bell"></i>
+            <span>Mensagens</span>
+        </div>
+    </div>
+
+    <!-- Botão Flutuante Mensagens -->
+    <div class="float-msg" onclick="abrirMensagens()">
+        <i class="fas fa-envelope"></i>
+    </div>
+
+    <!-- Modal Receita Médica -->
+    <div class="modal fade" id="receitaModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content modal-content-pharma">
+                <div class="receita-header">
+                    <i class="fas fa-prescription fa-2x mb-2"></i>
+                    <h4 style="margin: 0; font-weight: 700;">GERAR RECEITA MÉDICA</h4>
+                    <small>Preencha todos os campos obrigatórios (*)</small>
+                </div>
+                <div class="modal-body" style="padding: 24px;">
+                    <form id="receitaForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">ID da Receita <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control-pharma" id="receitaId" readonly style="background: #f5f5f5; font-family: monospace;">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Data da Receita <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control-pharma" id="receitaData" readonly style="background: #f5f5f5;">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nome do Paciente <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control-pharma" id="pacienteNome" placeholder="Nome completo do paciente" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Idade <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control-pharma" id="pacienteIdade" placeholder="Idade" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold">Diagnóstico <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control-pharma" id="pacienteDoenca" placeholder="Doença ou diagnóstico" required>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="fas fa-pills"></i> Medicamentos e Horários <span class="text-danger">*</span></label>
+                            <div id="medicamentosList"></div>
+                            <button type="button" class="btn-azul-outline btn-sm mt-2" style="width: auto; padding: 8px 20px;" onclick="adicionarMedicamento()">
+                                <i class="fas fa-plus"></i> Adicionar Medicamento
+                            </button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="fas fa-sticky-note"></i> Observações Gerais</label>
+                            <textarea class="form-control-pharma" id="receitaObs" rows="3" placeholder="Instruções adicionais..."></textarea>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Médico Prescritor</label>
+                                <input type="text" class="form-control-pharma" id="medicoNome" placeholder="Nome do médico">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">CRM</label>
+                                <input type="text" class="form-control-pharma" id="medicoCrm" placeholder="CRM">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-azul-outline" style="width: auto; padding: 10px 24px;" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn-azul" style="width: auto; padding: 10px 24px;" onclick="salvarReceita()">Gerar Receita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Visualizar Receita -->
+    <div class="modal fade" id="viewReceitaModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #89CFF0, #5BA3D9); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-prescription"></i> Detalhes da Receita</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="viewReceitaContent"></div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button class="btn-azul" onclick="imprimirReceita()">Imprimir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Receita -->
+    <div class="modal fade" id="editarReceitaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content modal-content-pharma">
+                <div class="receita-header">
+                    <i class="fas fa-edit fa-2x mb-2"></i>
+                    <h4 style="margin: 0; font-weight: 700;">EDITAR RECEITA</h4>
+                </div>
+                <div class="modal-body" style="padding: 24px;" id="editarReceitaContent"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-azul-outline" style="width: auto; padding: 10px 24px;" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn-azul" style="width: auto; padding: 10px 24px;" onclick="salvarEdicaoReceita()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Perfil -->
+    <div class="modal fade" id="perfilModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #89CFF0, #5BA3D9); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-user-circle"></i> Meu Perfil</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div style="width: 80px; height: 80px; background: #e8f4fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
+                            <i class="fas fa-user-md" style="font-size: 2.5rem; color: #89CFF0;"></i>
+                        </div>
+                        <h5 id="perfilNome" style="color: #1a2c3e;">Carregando...</h5>
+                        <span id="perfilPermissao" class="badge" style="background: #89CFF0; color: #1a2c3e;">Vendedor</span>
+                    </div>
+                    <hr>
+                    <div class="info-perfil" style="background: #f5f5f5; padding: 12px; border-radius: 12px; margin-bottom: 10px;">
+                        <div class="info-label">Usuário</div>
+                        <div class="info-valor" id="perfilUsuario">-</div>
+                    </div>
+                    <div class="info-perfil" style="background: #f5f5f5; padding: 12px; border-radius: 12px; margin-bottom: 10px;">
+                        <div class="info-label">E-mail</div>
+                        <div class="info-valor" id="perfilEmail">-</div>
+                    </div>
+                    <button class="btn-vermelho w-100 mt-3" onclick="logout()">Sair do Sistema</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Troco -->
+    <div class="modal fade" id="trocoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #89CFF0, #5BA3D9); color: white;">
+                    <h5 class="modal-title">Pagamento em Dinheiro</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-center">Total: <strong id="modalTotal" style="font-size: 1.5rem;">0 Kz</strong></p>
+                    <div class="search-wrapper mb-2">
+                        <i class="fas fa-money-bill text-muted ms-3"></i>
+                        <input type="number" id="valorRecebidoInput" class="search-input" placeholder="Valor recebido">
+                    </div>
+                    <p class="text-center">Troco: <strong id="trocoValor" style="color: #5BA3D9;">0 Kz</strong></p>
+                    <div class="numpad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(1)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">1</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(2)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">2</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(3)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">3</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(4)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">4</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(5)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">5</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(6)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">6</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(7)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">7</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(8)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">8</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(9)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">9</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(0)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">0</button>
+                        <button type="button" class="numpad-btn" onclick="adicionarNumero(0)" style="padding: 14px; background: #f0f2f5; border: none; border-radius: 16px;">00</button>
+                        <button type="button" class="numpad-btn" onclick="deletarNumero()" style="padding: 14px; background: #ffebee; color: #d32f2f; border: none; border-radius: 16px;">
+                            <i class="fas fa-backspace"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-azul w-100" onclick="confirmarPagamento()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Motivo Rejeição -->
+    <div class="modal fade" id="motivoRejeicaoModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #d32f2f, #b71c1c); color: white;">
+                    <h5 class="modal-title"><i class="fas fa-ban"></i> Rejeitar Pedido</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label fw-bold">Motivo da rejeição *</label>
+                    <textarea id="motivoRejeicao" class="form-control-pharma" rows="3" placeholder="Informe o motivo da rejeição..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn-vermelho" onclick="confirmarRejeicao()">Confirmar Rejeição</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvDc46HzQviKzniF05xH6dMuOtKtsbQYQ",
+            authDomain: "sandfarma-b2170.firebaseapp.com",
+            databaseURL: "https://sandfarma-b2170-default-rtdb.firebaseio.com",
+            projectId: "sandfarma-b2170",
+            storageBucket: "sandfarma-b2170.firebasestorage.app",
+            messagingSenderId: "27746642641",
+            appId: "1:27746642641:web:a0fc437da19b07178e33f0"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Variáveis globais
+        let carrinho = [];
+        let produtosCache = [];
+        let formaPagamento = '';
+        let usuarioAtual = null;
+        let valorRecebidoDinheiro = 0;
+        let currentReceita = null;
+        let editingReceitaId = null;
+        let receitasCache = [];
+        let todosPedidos = [];
+        let filtroPedidosAtual = 'todos';
+        let pedidoParaRejeitar = null;
+        let currentPage = 'vender';
+        
+        function formatKwanza(valor) {
+            if (valor === undefined || valor === null) valor = 0;
+            return new Intl.NumberFormat('pt-AO', {
+                style: 'currency',
+                currency: 'AOA',
+                minimumFractionDigits: 0
+            }).format(valor);
+        }
+        
+        function formatDateBr(data) {
+            if (!data) return '';
+            return new Date(data).toLocaleDateString('pt-BR');
+        }
+        
+        function escapeHtml(texto) {
+            if (!texto) return '';
+            const div = document.createElement('div');
+            div.textContent = texto;
+            return div.innerHTML;
+        }
+        
+        function showToast(mensagem, tipo = 'success') {
+            Swal.fire({
+                text: mensagem,
+                icon: tipo === 'error' ? 'error' : 'success',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                background: tipo === 'error' ? '#d32f2f' : '#5BA3D9',
+                color: 'white'
+            });
+        }
+        
+        // ==================== RECEITAS ====================
+        function gerarIdReceita() {
+            const ano = new Date().getFullYear();
+            const mes = String(new Date().getMonth() + 1).padStart(2, '0');
+            const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            return `RX-${ano}${mes}-${random}`;
+        }
+        
+        function adicionarMedicamento() {
+            const container = document.getElementById('medicamentosList');
+            if (!container) return;
+            const div = document.createElement('div');
+            div.className = 'medicamento-row';
+            div.innerHTML = `
+                <input type="text" class="form-control-pharma" placeholder="Nome do medicamento" style="flex: 2;">
+                <input type="time" class="form-control-pharma" placeholder="Horário" style="flex: 1;">
+                <input type="text" class="form-control-pharma" placeholder="Observação" style="flex: 2;">
+                <button type="button" class="btn btn-sm btn-danger" onclick="removerMedicamento(this)" style="border-radius: 12px;"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function removerMedicamento(btn) {
+            if (btn && btn.parentElement) btn.parentElement.remove();
+        }
+        
+        function abrirModalReceita() {
+            if (carrinho.length === 0) {
+                showToast("Adicione produtos ao carrinho primeiro!", "error");
+                return;
+            }
+            document.getElementById('receitaId').value = gerarIdReceita();
+            document.getElementById('receitaData').value = new Date().toLocaleDateString('pt-BR');
+            document.getElementById('pacienteNome').value = '';
+            document.getElementById('pacienteIdade').value = '';
+            document.getElementById('pacienteDoenca').value = '';
+            document.getElementById('receitaObs').value = '';
+            document.getElementById('medicoNome').value = '';
+            document.getElementById('medicoCrm').value = '';
+            const container = document.getElementById('medicamentosList');
+            if (container) {
+                container.innerHTML = '';
+                const div = document.createElement('div');
+                div.className = 'medicamento-row';
+                div.innerHTML = `
+                    <input type="text" class="form-control-pharma" placeholder="Nome do medicamento" style="flex: 2;">
+                    <input type="time" class="form-control-pharma" placeholder="Horário" style="flex: 1;">
+                    <input type="text" class="form-control-pharma" placeholder="Observação" style="flex: 2;">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removerMedicamento(this)"><i class="fas fa-trash"></i></button>
+                `;
+                container.appendChild(div);
+            }
+            new bootstrap.Modal(document.getElementById('receitaModal')).show();
+        }
+        
+        function salvarReceita() {
+            const receitaId = document.getElementById('receitaId').value;
+            const pacienteNome = document.getElementById('pacienteNome').value;
+            const pacienteIdade = document.getElementById('pacienteIdade').value;
+            const pacienteDoenca = document.getElementById('pacienteDoenca').value;
+            const receitaObs = document.getElementById('receitaObs').value;
+            const medicoNome = document.getElementById('medicoNome')?.value || '';
+            const medicoCrm = document.getElementById('medicoCrm')?.value || '';
+            
+            if (!pacienteNome || !pacienteIdade || !pacienteDoenca) {
+                showToast("Preencha todos os campos obrigatórios!", "error");
+                return;
+            }
+            const medicamentos = [];
+            const medicamentosDivs = document.querySelectorAll('#medicamentosList .medicamento-row');
+            if (medicamentosDivs.length === 0) {
+                showToast("Adicione pelo menos um medicamento!", "error");
+                return;
+            }
+            for (let div of medicamentosDivs) {
+                const inputs = div.querySelectorAll('input');
+                if (inputs[0] && inputs[0].value) {
+                    medicamentos.push({
+                        nome: inputs[0].value,
+                        horario: inputs[1] ? (inputs[1].value || 'Não especificado') : 'Não especificado',
+                        observacao: inputs[2] ? (inputs[2].value || '') : ''
+                    });
+                }
+            }
+            if (medicamentos.length === 0) {
+                showToast("Adicione pelo menos um medicamento válido!", "error");
+                return;
+            }
+            const receita = {
+                id: receitaId,
+                data: new Date().toISOString(),
+                paciente: { nome: pacienteNome, idade: pacienteIdade, doenca: pacienteDoenca },
+                medicamentos: medicamentos,
+                observacoes: receitaObs,
+                medico: medicoNome,
+                crm: medicoCrm,
+                vendedor: usuarioAtual?.nome || usuarioAtual?.usuario,
+                status: 'ativa'
+            };
+            database.ref('receitas/' + receitaId).set(receita).then(() => {
+                document.getElementById('numeroReceita').value = receitaId;
+                bootstrap.Modal.getInstance(document.getElementById('receitaModal')).hide();
+                showToast("Receita gerada! ID: " + receitaId, "success");
+                carregarReceitas();
+            }).catch(error => showToast("Erro: " + error.message, "error"));
+        }
+        
+        async function carregarReceitas(buscaId = null) {
+            try {
+                const snapshot = await database.ref('receitas').once('value');
+                const receitas = snapshot.val() || {};
+                let receitasArray = Object.entries(receitas).map(([id, r]) => ({ id, ...r }));
+                receitasArray = receitasArray.filter(r => r.vendedor === (usuarioAtual?.nome || usuarioAtual?.usuario));
+                if (buscaId) {
+                    receitasArray = receitasArray.filter(r => r.id && r.id.toLowerCase().includes(buscaId.toLowerCase()));
+                }
+                receitasCache = receitasArray.sort((a, b) => new Date(b.data) - new Date(a.data));
+                const container = document.getElementById('receitasList');
+                if (!container) return;
+                if (!receitasCache || receitasCache.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted py-4">Nenhuma receita encontrada</div>';
+                    return;
+                }
+                container.innerHTML = receitasCache.map(r => `
+                    <div class="receita-card" onclick="verReceita('${r.id}')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong><i class="fas fa-prescription"></i> ${escapeHtml(r.id)}</strong>
+                                <br>
+                                <small>Paciente: ${escapeHtml(r.paciente?.nome || 'N/A')}</small>
+                                <br>
+                                <small class="text-muted">${formatDateBr(r.data)}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-warning text-dark">${(r.medicamentos && r.medicamentos.length) || 0} medicamentos</span>
+                                <div class="mt-1">
+                                    <button class="btn-editar" onclick="event.stopPropagation(); abrirEditarReceita('${r.id}')">Editar</button>
+                                    <button class="btn-excluir" onclick="event.stopPropagation(); excluirReceita('${r.id}')">Excluir</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { 
+                console.error(e);
+                const container = document.getElementById('receitasList');
+                if (container) container.innerHTML = '<div class="text-center text-muted py-4">Erro ao carregar receitas</div>';
+            }
+        }
+        
+        function buscarReceitaPorId() {
+            const buscaId = document.getElementById('buscaReceitaId').value;
+            carregarReceitas(buscaId);
+        }
+        
+        function limparBuscaReceita() {
+            document.getElementById('buscaReceitaId').value = '';
+            carregarReceitas();
+        }
+        
+        async function verReceita(id) {
+            const snapshot = await database.ref('receitas/' + id).once('value');
+            const r = snapshot.val();
+            if (!r) return;
+            const medicamentosArray = r.medicamentos || [];
+            const medicamentosHtml = medicamentosArray.map(m => `
+                <div style="background:#f5f5f5; border-radius:12px; padding:8px; margin-bottom:8px;">
+                    <div><strong>💊 ${escapeHtml(m.nome)}</strong> <span class="badge bg-info">${escapeHtml(m.horario)}</span></div>
+                    <div class="small">${escapeHtml(m.observacao || '')}</div>
+                </div>
+            `).join('');
+            const content = `
+                <div class="text-center mb-3"><h5>SANDGEST PHARMA</h5><strong>RECEITA MÉDICA</strong><hr></div>
+                <p><strong>ID:</strong> ${escapeHtml(r.id)}</p>
+                <p><strong>Paciente:</strong> ${escapeHtml(r.paciente?.nome)} (${r.paciente?.idade || '?'} anos)</p>
+                <p><strong>Diagnóstico:</strong> ${escapeHtml(r.paciente?.doenca || 'N/A')}</p>
+                <p><strong>Medicamentos:</strong></p>${medicamentosHtml}
+                <p><strong>Observações:</strong> ${escapeHtml(r.observacoes || 'N/A')}</p>
+                ${r.medico ? `<p><strong>Médico:</strong> ${escapeHtml(r.medico)} ${r.crm ? '(CRM: '+escapeHtml(r.crm)+')' : ''}</p>` : ''}
+                <hr><small>Emitido por: ${escapeHtml(r.vendedor)}</small>
+            `;
+            document.getElementById('viewReceitaContent').innerHTML = content;
+            currentReceita = r;
+            new bootstrap.Modal(document.getElementById('viewReceitaModal')).show();
+        }
+        
+        function imprimirReceita() {
+            const content = document.getElementById('viewReceitaContent').innerHTML;
+            const win = window.open('', '_blank');
+            win.document.write(`<html><head><title>Receita</title><style>body{font-family:monospace;padding:40px;}</style></head><body>${content}</body></html>`);
+            win.print();
+        }
+        
+        async function abrirEditarReceita(id) {
+            const snapshot = await database.ref('receitas/' + id).once('value');
+            const r = snapshot.val();
+            if (!r) return;
+            editingReceitaId = id;
+            const medicamentosArray = r.medicamentos || [];
+            const medicamentosHtml = medicamentosArray.map(m => `
+                <div class="medicamento-row">
+                    <input type="text" class="form-control-pharma" placeholder="Medicamento" value="${escapeHtml(m.nome)}" style="flex:2;">
+                    <input type="time" class="form-control-pharma" value="${escapeHtml(m.horario)}" style="flex:1;">
+                    <input type="text" class="form-control-pharma" placeholder="Obs" value="${escapeHtml(m.observacao)}" style="flex:2;">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removerMedicamento(this)"><i class="fas fa-trash"></i></button>
+                </div>
+            `).join('');
+            const content = `
+                <form id="editForm">
+                    <div class="row g-3">
+                        <div class="col-6"><label>Paciente</label><input type="text" id="editPacienteNome" class="form-control-pharma" value="${escapeHtml(r.paciente?.nome || '')}"></div>
+                        <div class="col-3"><label>Idade</label><input type="number" id="editPacienteIdade" class="form-control-pharma" value="${r.paciente?.idade || ''}"></div>
+                        <div class="col-3"><label>Diagnóstico</label><input type="text" id="editPacienteDoenca" class="form-control-pharma" value="${escapeHtml(r.paciente?.doenca || '')}"></div>
+                    </div>
+                    <div class="divider"></div>
+                    <label>Medicamentos</label>
+                    <div id="editMedicamentosList">${medicamentosHtml}</div>
+                    <button type="button" class="btn-azul-outline mt-2" onclick="adicionarMedicamentoEdicao()">+ Adicionar</button>
+                    <div class="mt-3"><label>Observações</label><textarea id="editObservacoes" class="form-control-pharma">${escapeHtml(r.observacoes || '')}</textarea></div>
+                </form>
+            `;
+            document.getElementById('editarReceitaContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('editarReceitaModal')).show();
+        }
+        
+        function adicionarMedicamentoEdicao() {
+            const container = document.getElementById('editMedicamentosList');
+            if (!container) return;
+            const div = document.createElement('div');
+            div.className = 'medicamento-row';
+            div.innerHTML = `
+                <input type="text" class="form-control-pharma" placeholder="Medicamento" style="flex:2;">
+                <input type="time" class="form-control-pharma" style="flex:1;">
+                <input type="text" class="form-control-pharma" placeholder="Obs" style="flex:2;">
+                <button type="button" class="btn btn-sm btn-danger" onclick="removerMedicamento(this)"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function salvarEdicaoReceita() {
+            const pacienteNome = document.getElementById('editPacienteNome')?.value;
+            const pacienteIdade = document.getElementById('editPacienteIdade')?.value;
+            const pacienteDoenca = document.getElementById('editPacienteDoenca')?.value;
+            const observacoes = document.getElementById('editObservacoes')?.value || '';
+            if (!pacienteNome || !pacienteIdade || !pacienteDoenca) {
+                showToast("Preencha os campos obrigatórios", "error");
+                return;
+            }
+            const medicamentos = [];
+            document.querySelectorAll('#editMedicamentosList .medicamento-row').forEach(div => {
+                const inputs = div.querySelectorAll('input');
+                if (inputs[0] && inputs[0].value) {
+                    medicamentos.push({
+                        nome: inputs[0].value,
+                        horario: inputs[1]?.value || '',
+                        observacao: inputs[2]?.value || ''
+                    });
+                }
+            });
+            if (medicamentos.length === 0) {
+                showToast("Adicione medicamentos", "error");
+                return;
+            }
+            database.ref('receitas/' + editingReceitaId).update({
+                paciente: { nome: pacienteNome, idade: pacienteIdade, doenca: pacienteDoenca },
+                medicamentos: medicamentos,
+                observacoes: observacoes
+            }).then(() => {
+                bootstrap.Modal.getInstance(document.getElementById('editarReceitaModal')).hide();
+                showToast("Receita atualizada", "success");
+                carregarReceitas();
+            }).catch(e => showToast("Erro", "error"));
+        }
+        
+        function excluirReceita(id) {
+            Swal.fire({
+                title: 'Excluir Receita?',
+                text: 'Essa ação não pode ser desfeita.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d32f2f',
+                confirmButtonText: 'Excluir',
+                cancelButtonText: 'Cancelar'
+            }).then(res => {
+                if (res.isConfirmed) {
+                    database.ref('receitas/' + id).remove().then(() => {
+                        showToast("Receita excluída", "success");
+                        carregarReceitas();
+                    });
+                }
+            });
+        }
+        
+        // ==================== PRODUTOS ====================
+        function renderProdutoCardGrid(produto, eventoClick) {
+            if (!produto) return '';
+            let classeEstoque = '';
+            let textoEstoque = `${produto.quantidadeEstoque} un.`;
+            if (produto.quantidadeEstoque <= 3) {
+                classeEstoque = 'critico';
+                textoEstoque = `⚠️ ${produto.quantidadeEstoque}`;
+            }
+            const imagemHtml = produto.imagem ? `<img src="${produto.imagem}" class="produto-imagem" onerror="this.src='https://placehold.co/80x80?text=💊'">` : `<div class="produto-imagem"><i class="fas fa-capsules fa-3x text-muted"></i></div>`;
+            return `
+                <div class="produto-card-grid" onclick="${eventoClick}">
+                    ${imagemHtml}
+                    <div class="produto-nome">${escapeHtml(produto.nome)}</div>
+                    <div class="produto-preco">${formatKwanza(produto.preco)}</div>
+                    <div><span class="produto-estoque ${classeEstoque}"><i class="fas fa-box"></i> ${textoEstoque}</span></div>
+                    <button class="btn-add-carrinho"><i class="fas fa-cart-plus"></i> Adicionar</button>
+                </div>
+            `;
+        }
+        
+        async function carregarProdutos() {
+            try {
+                const snapshot = await database.ref('produtos').once('value');
+                const produtos = snapshot.val() || {};
+                produtosCache = Object.entries(produtos).map(([id, p]) => ({ id, ...p, quantidadeEstoque: p.quantidade || 0 }));
+                produtosCache = produtosCache.filter(p => p.quantidadeEstoque > 0);
+                carregarDestaques();
+            } catch(e) { console.error(e); }
+        }
+        
+        function carregarDestaques() {
+            const destaques = produtosCache.slice(0, 8);
+            const container = document.getElementById('produtosDestaque');
+            if (!container) return;
+            if (!destaques || destaques.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-4">Nenhum produto disponível</div>';
+                return;
+            }
+            container.innerHTML = destaques.map(produto => renderProdutoCardGrid(produto, `adicionarAoCarrinho('${produto.id}', '${escapeHtml(produto.nome)}', ${produto.preco}, ${produto.quantidadeEstoque})`)).join('');
+        }
+        
+        function buscarProdutos() {
+            const busca = document.getElementById('buscaProduto').value.toLowerCase();
+            const container = document.getElementById('resultadoBusca');
+            if (!busca) {
+                container.innerHTML = '';
+                return;
+            }
+            const resultados = produtosCache.filter(p => p.nome?.toLowerCase().includes(busca));
+            if (resultados.length === 0) {
+                container.innerHTML = '<div class="text-muted text-center py-2">Nenhum produto encontrado</div>';
+                return;
+            }
+            container.innerHTML = `<div class="produtos-grid">${resultados.map(produto => renderProdutoCardGrid(produto, `adicionarAoCarrinho('${produto.id}', '${escapeHtml(produto.nome)}', ${produto.preco}, ${produto.quantidadeEstoque})`)).join('')}</div>`;
+        }
+        
+        async function adicionarAoCarrinho(id, nome, preco, estoque) {
+            const result = await Swal.fire({
+                title: nome,
+                text: `Preço: ${formatKwanza(preco)} | Estoque: ${estoque}`,
+                input: 'number',
+                inputValue: 1,
+                inputAttributes: { min: 1, max: estoque },
+                confirmButtonColor: '#5BA3D9',
+                confirmButtonText: 'Adicionar',
+                showCancelButton: true
+            });
+            if (!result.isConfirmed) return;
+            const quantidade = parseInt(result.value);
+            if (!quantidade || quantidade < 1 || quantidade > estoque) return;
+            const existente = carrinho.find(item => item.id === id);
+            if (existente) existente.quantidade += quantidade;
+            else carrinho.push({ id, nome, preco, quantidade });
+            renderizarCarrinho();
+            showToast(`${quantidade}x ${nome} adicionado`, "success");
+            document.getElementById('buscaProduto').value = '';
+            document.getElementById('resultadoBusca').innerHTML = '';
+        }
+        
+        // ==================== CARRINHO ====================
+        function renderizarCarrinho() {
+            const container = document.getElementById('carrinhoItems');
+            const badge = document.getElementById('carrinhoBadge');
+            if (!carrinho || carrinho.length === 0) {
+                if (container) container.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-shopping-cart fa-3x mb-2"></i><br>Carrinho vazio</div>';
+                const totalSpan = document.getElementById('totalGeral');
+                if (totalSpan) totalSpan.innerHTML = formatKwanza(0);
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+            let total = 0;
+            container.innerHTML = carrinho.map((item, index) => {
+                const subtotal = item.preco * item.quantidade;
+                total += subtotal;
+                return `
+                    <div class="carrinho-item-card">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="fw-bold">${escapeHtml(item.nome)}</div>
+                                <div class="small">${formatKwanza(item.preco)} cada</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="d-flex gap-2 mb-1 justify-content-end">
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="alterarQuantidade(${index}, -1)">-</button>
+                                    <span class="fw-bold">${item.quantidade}</span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="alterarQuantidade(${index}, 1)">+</button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="removerItem(${index})"><i class="fas fa-trash"></i></button>
+                                </div>
+                                <div class="fw-bold">${formatKwanza(subtotal)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('totalGeral').innerHTML = formatKwanza(total);
+            if (badge) {
+                badge.style.display = 'flex';
+                badge.innerText = carrinho.reduce((s, i) => s + i.quantidade, 0);
+            }
+        }
+        
+        function alterarQuantidade(index, delta) {
+            if (!carrinho[index]) return;
+            const item = carrinho[index];
+            const produto = produtosCache.find(p => p.id === item.id);
+            const nova = item.quantidade + delta;
+            if (nova < 1) carrinho.splice(index, 1);
+            else if (produto && nova > produto.quantidadeEstoque) showToast("Estoque insuficiente", "error");
+            else item.quantidade = nova;
+            renderizarCarrinho();
+        }
+        
+        function removerItem(index) {
+            carrinho.splice(index, 1);
+            renderizarCarrinho();
+        }
+        
+        function limparCarrinho() {
+            carrinho = [];
+            renderizarCarrinho();
+        }
+        
+        function cancelarVenda() {
+            limparCarrinho();
+        }
+        
+        function selecionarPagamento(tipo) {
+            formaPagamento = tipo;
+            document.getElementById('btnDinheiro').className = 'btn-azul-outline w-100 py-2';
+            document.getElementById('btnDebito').className = 'btn-azul-outline w-100 py-2';
+            document.getElementById('btnCredito').className = 'btn-azul-outline w-100 py-2';
+            document.getElementById(`btn${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`).className = 'btn-azul w-100 py-2';
+        }
+        
+        function finalizarVenda() {
+            if (!carrinho || carrinho.length === 0) {
+                showToast("Carrinho vazio", "error");
+                return;
+            }
+            if (!formaPagamento) {
+                showToast("Selecione a forma de pagamento", "error");
+                return;
+            }
+            const total = carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+            if (formaPagamento === 'dinheiro') {
+                document.getElementById('modalTotal').innerHTML = formatKwanza(total);
+                document.getElementById('valorRecebidoInput').value = '';
+                document.getElementById('trocoValor').innerHTML = '0 Kz';
+                valorRecebidoDinheiro = 0;
+                new bootstrap.Modal(document.getElementById('trocoModal')).show();
+            } else {
+                processarVenda();
+            }
+        }
+        
+        function adicionarNumero(num) {
+            valorRecebidoDinheiro = valorRecebidoDinheiro * 10 + num;
+            document.getElementById('valorRecebidoInput').value = valorRecebidoDinheiro;
+            calcularTroco();
+        }
+        
+        function deletarNumero() {
+            valorRecebidoDinheiro = Math.floor(valorRecebidoDinheiro / 10);
+            document.getElementById('valorRecebidoInput').value = valorRecebidoDinheiro || '';
+            calcularTroco();
+        }
+        
+        function calcularTroco() {
+            const total = carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+            const troco = valorRecebidoDinheiro - total;
+            document.getElementById('trocoValor').innerHTML = troco >= 0 ? formatKwanza(troco) : 'Valor insuficiente';
+        }
+        
+        function confirmarPagamento() {
+            const total = carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+            if (valorRecebidoDinheiro < total) {
+                showToast("Valor insuficiente", "error");
+                return;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('trocoModal')).hide();
+            processarVenda();
+        }
+        
+        async function processarVenda() {
+            const receita = document.getElementById('numeroReceita').value;
+            const total = carrinho.reduce((s, i) => s + (i.preco * i.quantidade), 0);
+            for (const item of carrinho) {
+                const produto = produtosCache.find(p => p.id === item.id);
+                if (!produto || produto.quantidadeEstoque < item.quantidade) {
+                    showToast(`Estoque insuficiente para ${item.nome}`, "error");
+                    return;
+                }
+            }
+            for (const item of carrinho) {
+                const produto = produtosCache.find(p => p.id === item.id);
+                if (produto) {
+                    await database.ref(`produtos/${item.id}`).update({ quantidade: produto.quantidadeEstoque - item.quantidade });
+                    produto.quantidadeEstoque -= item.quantidade;
+                }
+            }
+            const vendaId = Date.now().toString();
+            await database.ref('vendas/' + vendaId).set({
+                id: vendaId,
+                data: new Date().toISOString().split('T')[0],
+                hora: new Date().toLocaleTimeString(),
+                items: carrinho.map(i => ({ id: i.id, nome: i.nome, quantidade: i.quantidade, preco: i.preco })),
+                total: total,
+                formaPagamento: formaPagamento,
+                receita: receita || null,
+                vendedor: usuarioAtual?.nome || usuarioAtual?.usuario
+            });
+            carrinho = [];
+            renderizarCarrinho();
+            document.getElementById('numeroReceita').value = '';
+            formaPagamento = '';
+            document.getElementById('btnDinheiro').className = 'btn-azul-outline w-100 py-2';
+            document.getElementById('btnDebito').className = 'btn-azul-outline w-100 py-2';
+            document.getElementById('btnCredito').className = 'btn-azul-outline w-100 py-2';
+            await carregarProdutos();
+            carregarHistorico();
+            showToast(`Venda finalizada! ${formatKwanza(total)}`, "success");
+        }
+        
+        async function carregarHistorico() {
+            try {
+                const snapshot = await database.ref('vendas').once('value');
+                const vendas = snapshot.val() || {};
+                const minhasVendas = Object.entries(vendas).map(([id, v]) => ({ id, ...v }))
+                    .filter(v => v.vendedor === (usuarioAtual?.nome || usuarioAtual?.usuario))
+                    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))
+                    .slice(0, 15);
+                const container = document.getElementById('historicoVendas');
+                if (!container) return;
+                if (!minhasVendas || minhasVendas.length === 0) {
+                    container.innerHTML = '<div class="text-center text-muted py-4">Nenhuma venda registrada</div>';
+                    return;
+                }
+                container.innerHTML = minhasVendas.map(v => `
+                    <div class="carrinho-item-card">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <div class="fw-bold">${v.data || 'N/A'}</div>
+                                <div class="small">${v.hora || ''}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-success">${formatKwanza(v.total)}</div>
+                                <div class="small">${v.formaPagamento || ''}</div>
+                            </div>
+                        </div>
+                        <div class="small mt-2">${(v.items && v.items.length) || 0} itens vendidos</div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+        
+        // ==================== PEDIDOS DOS CLIENTES ====================
+        async function carregarPedidosClientes() {
+            try {
+                const snapshot = await database.ref('pedidos_cliente').once('value');
+                const pedidos = snapshot.val() || {};
+                todosPedidos = Object.entries(pedidos).map(([id, p]) => ({ id, ...p })).sort((a, b) => new Date(b.data) - new Date(a.data));
+                aplicarFiltroPedidos();
+                atualizarBadgePedidos();
+                carregarDashboardPedidosPendentes();
+            } catch(e) { console.error(e); }
+        }
+        
+        function aplicarFiltroPedidos() {
+            let filtrados = todosPedidos;
+            if (filtroPedidosAtual !== 'todos') {
+                filtrados = todosPedidos.filter(p => p.status === filtroPedidosAtual);
+            }
+            const container = document.getElementById('pedidosClientesList');
+            if (!container) return;
+            if (!filtrados || filtrados.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-4">Nenhum pedido encontrado</div>';
+                return;
+            }
+            container.innerHTML = filtrados.map(p => {
+                let statusClass = '';
+                let statusText = '';
+                switch(p.status) {
+                    case 'confirmado': statusClass = 'status-confirmado'; statusText = 'Confirmado'; break;
+                    case 'recebido': statusClass = 'status-recebido'; statusText = 'Recebido'; break;
+                    case 'caminho': statusClass = 'status-caminho'; statusText = 'A Caminho'; break;
+                    case 'entregue': statusClass = 'status-entregue'; statusText = 'Entregue'; break;
+                    case 'rejeitado': statusClass = 'status-rejeitado'; statusText = 'Rejeitado'; break;
+                    default: statusClass = 'status-confirmado'; statusText = p.status || 'Confirmado';
+                }
+                return `
+                    <div class="pedido-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-bold">Pedido: ${escapeHtml(p.rastreio || p.id.slice(-8))}</div>
+                                <div class="small text-muted">Cliente: ${escapeHtml(p.clienteNome)}</div>
+                                <div class="small">Data: ${p.data || ''} às ${p.hora || ''}</div>
+                                <div class="small">Total: ${formatKwanza(p.total)}</div>
+                                <div class="mt-1"><span class="pedido-status ${statusClass}">${statusText}</span></div>
+                                ${p.motivoRejeicao ? `<div class="small text-danger mt-1">Motivo: ${escapeHtml(p.motivoRejeicao)}</div>` : ''}
+                            </div>
+                            <div class="text-end">
+                                ${p.status === 'confirmado' ? `
+                                    <button class="btn-azul btn-pedido" onclick="atualizarStatusPedido('${p.id}', 'recebido')"><i class="fas fa-check"></i> Recebido</button>
+                                    <button class="btn-vermelho btn-pedido" onclick="abrirMotivoRejeicao('${p.id}')"><i class="fas fa-ban"></i> Rejeitar</button>
+                                ` : p.status === 'recebido' ? `
+                                    <button class="btn-azul btn-pedido" onclick="atualizarStatusPedido('${p.id}', 'caminho')"><i class="fas fa-truck"></i> A Caminho</button>
+                                ` : p.status === 'caminho' ? `
+                                    <button class="btn-azul btn-pedido" onclick="atualizarStatusPedido('${p.id}', 'entregue')"><i class="fas fa-check-double"></i> Entregue</button>
+                                ` : p.status === 'entregue' ? `
+                                    <span class="badge bg-success">Entregue</span>
+                                ` : p.status === 'rejeitado' ? `
+                                    <span class="badge bg-danger">Rejeitado</span>
+                                ` : ''}
+                                <button class="btn-outline-pharma btn-pedido mt-1" onclick="verDetalhesPedido('${p.id}')"><i class="fas fa-eye"></i> Detalhes</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function atualizarBadgePedidos() {
+            const pendentes = todosPedidos.filter(p => p.status === 'confirmado').length;
+            const badge = document.getElementById('pedidoBadge');
+            if (badge) {
+                if (pendentes > 0) {
+                    badge.style.display = 'flex';
+                    badge.innerText = pendentes > 99 ? '99+' : pendentes;
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+        
+        function carregarDashboardPedidosPendentes() {
+            const pendentes = todosPedidos.filter(p => p.status === 'confirmado').slice(0, 5);
+            const container = document.getElementById('pedidosPendentesList');
+            const card = document.getElementById('dashboardPedidosCard');
+            if (!container || !card) return;
+            if (!pendentes || pendentes.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+            card.style.display = 'block';
+            container.innerHTML = pendentes.map(p => `
+                <div class="pendente-item" onclick="verDetalhesPedido('${p.id}')">
+                    <div>
+                        <div class="fw-bold">${escapeHtml(p.clienteNome)}</div>
+                        <div class="small">${p.data || ''} - ${formatKwanza(p.total)}</div>
+                    </div>
+                    <div><span class="badge bg-warning">Pendente</span> <i class="fas fa-chevron-right"></i></div>
+                </div>
+            `).join('');
+        }
+        
+        function filtrarPedidos(filtro) {
+            filtroPedidosAtual = filtro;
+            aplicarFiltroPedidos();
+        }
+        
+        async function atualizarStatusPedido(pedidoId, novoStatus) {
+            try {
+                await database.ref(`pedidos_cliente/${pedidoId}`).update({ status: novoStatus });
+                let msg = '';
+                if (novoStatus === 'recebido') msg = 'Pedido marcado como RECEBIDO!';
+                else if (novoStatus === 'caminho') msg = 'Pedido enviado para ENTREGA!';
+                else if (novoStatus === 'entregue') msg = 'Pedido marcado como ENTREGUE!';
+                showToast(msg, "success");
+                await carregarPedidosClientes();
+                if (currentPage === 'pedidos-clientes') aplicarFiltroPedidos();
+            } catch(e) { showToast("Erro ao atualizar status", "error"); }
+        }
+        
+        function abrirMotivoRejeicao(pedidoId) {
+            pedidoParaRejeitar = pedidoId;
+            document.getElementById('motivoRejeicao').value = '';
+            new bootstrap.Modal(document.getElementById('motivoRejeicaoModal')).show();
+        }
+        
+        async function confirmarRejeicao() {
+            const motivo = document.getElementById('motivoRejeicao').value.trim();
+            if (!motivo) {
+                showToast("Informe o motivo da rejeição", "error");
+                return;
+            }
+            try {
+                await database.ref(`pedidos_cliente/${pedidoParaRejeitar}`).update({ status: 'rejeitado', motivoRejeicao: motivo });
+                bootstrap.Modal.getInstance(document.getElementById('motivoRejeicaoModal')).hide();
+                showToast("Pedido rejeitado", "success");
+                await carregarPedidosClientes();
+                if (currentPage === 'pedidos-clientes') aplicarFiltroPedidos();
+            } catch(e) { showToast("Erro ao rejeitar", "error"); }
+            pedidoParaRejeitar = null;
+        }
+        
+        async function verDetalhesPedido(id) {
+            const snapshot = await database.ref('pedidos_cliente/' + id).once('value');
+            const p = snapshot.val();
+            if (!p) return;
+            const itemsArray = p.items || [];
+            const itemsHtml = itemsArray.map(item => `
+                <div class="d-flex justify-content-between p-2" style="background:#f8fbfd; border-radius:10px; margin-bottom:5px;">
+                    <div><strong>${escapeHtml(item.nome)}</strong><br><small>${item.quantidade}x ${formatKwanza(item.preco)}</small></div>
+                    <div>${formatKwanza(item.subtotal)}</div>
+                </div>
+            `).join('');
+            Swal.fire({
+                title: `Pedido ${p.rastreio || p.id.slice(-8)}`,
+                html: `
+                    <div class="text-start">
+                        <p><strong>Cliente:</strong> ${escapeHtml(p.clienteNome)}</p>
+                        <p><strong>Data:</strong> ${p.data || ''} ${p.hora || ''}</p>
+                        <p><strong>Itens:</strong></p>
+                        ${itemsHtml}
+                        <hr>
+                        <p><strong>Total:</strong> ${formatKwanza(p.total)}</p>
+                        <p><strong>Pagamento:</strong> ${p.formaPagamento || ''}</p>
+                        <p><strong>Endereço:</strong> ${escapeHtml(p.endereco || '')}</p>
+                        <p><strong>Telefone:</strong> ${escapeHtml(p.telefone || '')}</p>
+                        ${p.motivoRejeicao ? `<p class="text-danger"><strong>Motivo rejeição:</strong> ${escapeHtml(p.motivoRejeicao)}</p>` : ''}
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonColor: '#5BA3D9'
+            });
+        }
+        
+        // ==================== MENSAGENS ====================
+        async function carregarMensagens() {
+            try {
+                const snapshot = await database.ref('mensagens_adm').once('value');
+                const mensagens = snapshot.val() || {};
+                const comunicados = Object.entries(mensagens).map(([id, m]) => ({ id, ...m }))
+                    .filter(m => m.para === 'todos')
+                    .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))
+                    .slice(0, 15);
+                const container = document.getElementById('mensagensList');
+                if (!container) return;
+                if (!comunicados || comunicados.length === 0) {
+                    container.innerHTML = '<div class="text-muted text-center py-4">Nenhuma mensagem</div>';
+                    return;
+                }
+                container.innerHTML = comunicados.map(m => `
+                    <div class="comunicado-item ${m.prioridade === 'urgente' ? 'comunicado-urgente' : ''}">
+                        <div class="d-flex justify-content-between">
+                            <div class="fw-bold">${escapeHtml(m.assunto)}</div>
+                            <small>${formatDateBr(m.timestamp)}</small>
+                        </div>
+                        <div class="small mt-1">${escapeHtml(m.conteudo)}</div>
+                    </div>
+                `).join('');
+            } catch(e) { console.error(e); }
+        }
+        
+        async function enviarMensagem() {
+            const assunto = document.getElementById('msgAssunto').value;
+            const conteudo = document.getElementById('msgConteudo').value;
+            if (!assunto || !conteudo) {
+                showToast("Preencha assunto e mensagem", "error");
+                return;
+            }
+            await database.ref('mensagens_usuarios/' + Date.now()).set({
+                de: usuarioAtual?.uid,
+                deNome: usuarioAtual?.nome || usuarioAtual?.usuario,
+                assunto: assunto,
+                conteudo: conteudo,
+                prioridade: document.getElementById('msgPrioridade').value,
+                timestamp: new Date().toISOString(),
+                status: 'nao_lida'
+            });
+            document.getElementById('msgAssunto').value = '';
+            document.getElementById('msgConteudo').value = '';
+            showToast("Mensagem enviada ao ADM", "success");
+        }
+        
+        // ==================== PERFIL & LOGIN ====================
+        function checkLogin() {
+            const userStr = localStorage.getItem('sandgest_user');
+            if (!userStr) {
+                window.location.href = 'index.html';
+                return false;
+            }
+            usuarioAtual = JSON.parse(userStr);
+            const nomeSpan = document.getElementById('vendedorNome');
+            if (nomeSpan) nomeSpan.innerText = usuarioAtual.nome || usuarioAtual.usuario;
+            return true;
+        }
+        
+        function abrirPerfil() {
+            if (!usuarioAtual) return;
+            document.getElementById('perfilNome').innerText = usuarioAtual.nome || usuarioAtual.usuario;
+            document.getElementById('perfilUsuario').innerText = usuarioAtual.usuario || '-';
+            document.getElementById('perfilEmail').innerText = usuarioAtual.email || 'Não informado';
+            new bootstrap.Modal(document.getElementById('perfilModal')).show();
+        }
+        
+        function logout() {
+            Swal.fire({
+                title: 'Sair do Sistema',
+                text: 'Deseja realmente sair?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d32f2f',
+                confirmButtonText: 'Sim, sair',
+                cancelButtonText: 'Cancelar'
+            }).then(result => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('sandgest_user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        
+        function abrirMensagens() {
+            changePage('mensagens');
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(t => t.classList.remove('active'));
+            const menuItem = document.querySelector(`.menu-item[data-tab="${page}"]`);
+            if (menuItem) menuItem.classList.add('active');
+            const panel = document.getElementById(`tab-${page}`);
+            if (panel) panel.classList.add('active');
+            if (page === 'pedidos-clientes') carregarPedidosClientes();
+            if (page === 'minhas-vendas') carregarHistorico();
+            if (page === 'receitas') carregarReceitas();
+            if (page === 'vender') carregarDashboardPedidosPendentes();
+        }
+        
+        // ==================== EVENT LISTENERS ====================
+        document.querySelectorAll('.menu-item[data-tab]').forEach(item => {
+            item.addEventListener('click', () => changePage(item.getAttribute('data-tab')));
+        });
+        
+        const buscaInput = document.getElementById('buscaProduto');
+        if (buscaInput) {
+            buscaInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') buscarProdutos();
+            });
+        }
+        
+        // ==================== INICIALIZAÇÃO ====================
+        function init() {
+            if (!checkLogin()) return;
+            carregarProdutos();
+            carregarHistorico();
+            carregarMensagens();
+            carregarReceitas();
+            carregarPedidosClientes();
+            setInterval(carregarMensagens, 30000);
+            setInterval(carregarPedidosClientes, 15000);
+        }
+        
+        // Expor funções globais
+        window.adicionarAoCarrinho = adicionarAoCarrinho;
+        window.buscarProdutos = buscarProdutos;
+        window.alterarQuantidade = alterarQuantidade;
+        window.removerItem = removerItem;
+        window.limparCarrinho = limparCarrinho;
+        window.cancelarVenda = cancelarVenda;
+        window.selecionarPagamento = selecionarPagamento;
+        window.finalizarVenda = finalizarVenda;
+        window.adicionarNumero = adicionarNumero;
+        window.deletarNumero = deletarNumero;
+        window.confirmarPagamento = confirmarPagamento;
+        window.abrirPerfil = abrirPerfil;
+        window.logout = logout;
+        window.abrirMensagens = abrirMensagens;
+        window.enviarMensagem = enviarMensagem;
+        window.adicionarMedicamento = adicionarMedicamento;
+        window.removerMedicamento = removerMedicamento;
+        window.salvarReceita = salvarReceita;
+        window.verReceita = verReceita;
+        window.imprimirReceita = imprimirReceita;
+        window.buscarReceitaPorId = buscarReceitaPorId;
+        window.limparBuscaReceita = limparBuscaReceita;
+        window.abrirEditarReceita = abrirEditarReceita;
+        window.excluirReceita = excluirReceita;
+        window.salvarEdicaoReceita = salvarEdicaoReceita;
+        window.adicionarMedicamentoEdicao = adicionarMedicamentoEdicao;
+        window.changePage = changePage;
+        window.filtrarPedidos = filtrarPedidos;
+        window.atualizarStatusPedido = atualizarStatusPedido;
+        window.verDetalhesPedido = verDetalhesPedido;
+        window.abrirMotivoRejeicao = abrirMotivoRejeicao;
+        window.confirmarRejeicao = confirmarRejeicao;
+        
+        init();
+    </script>
+</body>
+</html>
